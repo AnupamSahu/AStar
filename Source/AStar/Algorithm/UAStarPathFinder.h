@@ -63,7 +63,7 @@ protected:
 	virtual void GetNeighbors(const FMapLocation& Target, TArray<FMapLocation>& OutNeighborLocations);
 
 	// Performs some initialization before running the Path Finder
-	void Initialize(const FVector& StartLocation, const FVector& DestinationLocation, TArray<FVector>& OutPath);
+	bool Initialize(const FVector& StartLocation, const FVector& DestinationLocation, TArray<FVector>& OutPath);
 
 	// Starts from Destination, backtracks to Start, filling OutPath with the Nodes travelled 
 	void TracePath(TArray<FVector>& OutPath);

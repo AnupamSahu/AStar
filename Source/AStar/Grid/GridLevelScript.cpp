@@ -61,11 +61,6 @@ void AGridLevelScript::BeginPlay()
 	Super::BeginPlay();
 }
 
-AGridLevelScript::AGridLevelScript()
-{
-	PrimaryActorTick.bCanEverTick = true;
-}
-
 void AGridLevelScript::GetGrid(TArray<TArray<FMapNode>>& OutGrid) const
 {
 	const int32 RowSize = GridRows.Num();
@@ -113,42 +108,6 @@ bool AGridLevelScript::ConvertWorldToGridLocation(const FVector& WorldLocation, 
 	OutGridLocation.Y = (RelativeWorldLocation.Y / MinimumSeparation);
 
 	return true;
-}
-
-void AGridLevelScript::Tick(float DeltaSeconds)
-{
-	//Super::Tick(DeltaSeconds);
-
-	if (!bDebug)
-	{
-		return;
-	}
-
-	for (int32 i = 0; i < GridRows.Num(); ++i)
-	{
-		const TArray<ABlockActor*>& GridRow = GridRows[i];
-		for (int32 j = 0; j < GridRow.Num(); ++j)
-		{
-			if (!IsValid(GridRow[j]))
-			{
-				continue;
-			}
-
-			FVector DrawLocation = GridRow[j]->GetActorLocation();
-			FMapLocation GridLocation;
-			if (ConvertWorldToGridLocation(DrawLocation, GridLocation))
-			{
-				FVector RelativeLocation = DrawLocation - GridOrigin;
-				FString DebugMessage = FString::Printf(TEXT("(%d, %d) : (%d, %d)"), GridLocation.X, GridLocation.Y, i, j);
-				DrawDebugString(GetWorld(), DrawLocation, *DebugMessage, nullptr, FColor::Blue, DeltaSeconds);
-			}
-			else
-			{
-				FString DebugMessage = FString::Printf(TEXT("Invalid World Location"));
-				DrawDebugString(GetWorld(), DrawLocation, *DebugMessage, nullptr, FColor::Blue, DeltaSeconds);
-			}
-		}
-	}
 }
 
 void AGridLevelScript::SetMinMaxLocations()

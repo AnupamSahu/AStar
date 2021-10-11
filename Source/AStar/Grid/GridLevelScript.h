@@ -18,14 +18,11 @@ class ABlockActor;
 UCLASS()
 class ASTAR_API AGridLevelScript : public ALevelScriptActor
 {
-	
 	GENERATED_BODY()
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGridGenerated);
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGridCleared);
 	
 public:
-
-	AGridLevelScript();
 	
 	// Provides a two-dimensional Array of FGridElement, a structure that contains information about an element in the Grid 
 	virtual void GetGrid(TArray<TArray<FMapNode>>& OutGrid) const;
@@ -35,9 +32,6 @@ public:
 
 	// Converts a World Location to a Location on the Grid, returns true if the World Location lies within the bounds of the Grid  
 	virtual bool ConvertWorldToGridLocation(const FVector& WorldLocation, FMapLocation& OutGridLocation) const;
-
-	// Used for debugging
-	virtual void Tick(float DeltaSeconds) override;
 
 public:
 	
@@ -102,5 +96,4 @@ protected:
 
 	// Stores the Maximum Location of the Grid's Bounds
 	FVector MaxWorldLocation;
-	
 };

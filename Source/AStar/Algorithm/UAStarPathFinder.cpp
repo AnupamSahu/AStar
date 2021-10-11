@@ -18,10 +18,11 @@ void UAStarPathFinder::BeginPlay()
 	}
 }
 
-void UAStarPathFinder::Initialize(const FVector& StartLocation, const FVector& DestinationLocation, TArray<FVector>& OutPath)
+bool UAStarPathFinder::Initialize(const FVector& StartLocation, const FVector& DestinationLocation,
+                                  TArray<FVector>& OutPath)
 {
 	// If Map is empty, don't proceed
-	if(Map.MapBase.Num() == 0) { return; }
+	if (Map.MapBase.Num() == 0) { return false; }
 
 	// Start fresh 
 	OutPath.Empty();
@@ -29,23 +30,23 @@ void UAStarPathFinder::Initialize(const FVector& StartLocation, const FVector& D
 	Closed.Empty();
 
 
-	GridLevelActor->ConvertWorldToGridLocation(StartLocation, StartMapLocation);
-	GridLevelActor->ConvertWorldToGridLocation(DestinationLocation, DestinationMapLocation);
+	if (!GridLevelActor->ConvertWorldToGridLocation(StartLocation, StartMapLocation)) { return false; }
+	if (!GridLevelActor->ConvertWorldToGridLocation(DestinationLocation, DestinationMapLocation)) { return false; }
 
 	// Destination is marked as the Target
 	Map[DestinationMapLocation].bIsTarget = true;
 
 	// Initialize the Open Array with the Start MapNode
 	Open.HeapPush(Map[StartMapLocation], FMostOptimalNode());
+
+	return true;
 }
 
-void UAStarPathFinder::FindPath(const FVector& StartLocation, const FVector& DestinationLocation, TArray<FVector>& OutPath)
+void UAStarPathFinder::FindPath(const FVector& StartLocation, const FVector& DestinationLocation,
+                                TArray<FVector>& OutPath)
 {
-	Initialize(StartLocation, DestinationLocation, OutPath);
+	if (!Initialize(StartLocation, DestinationLocation, OutPath)) { return; }
 
-	// If Map is empty, don't proceed
-	if(Map.MapBase.Num() == 0) { return; }
-	
 	// While there are still MapNodes to be visited
 	while (Open.Num() > 0)
 	{
@@ -92,7 +93,7 @@ void UAStarPathFinder::FindPath(const FVector& StartLocation, const FVector& Des
 			}
 		}
 	}
-	
+
 	TracePath(OutPath);
 }
 
@@ -102,7 +103,7 @@ void UAStarPathFinder::TracePath(TArray<FVector>& OutPath)
 	FMapNode& Current = Map[DestinationMapLocation];
 
 	// While we haven't arrived at the Starting MapNode and the Current MapNode has a valid Parent (a Path really exists)
-	while(Current != Map[StartMapLocation] && Map.IsValidLocation(Current.ParentLocation))
+	while (Current != Map[StartMapLocation] && Map.IsValidLocation(Current.ParentLocation))
 	{
 		// Add this MapNode to the Path
 		OutPath.Add(Current.WorldLocation);
@@ -110,12 +111,12 @@ void UAStarPathFinder::TracePath(TArray<FVector>& OutPath)
 		Current = Map[Current.ParentLocation];
 	}
 
-	if(bDebugPath)
+	if (bDebugPath)
 	{
 		UKismetSystemLibrary::FlushPersistentDebugLines(GetWorld());
-		for(int32 i = 0; i < OutPath.Num() - 1; ++i)
+		for (int32 i = 0; i < OutPath.Num() - 1; ++i)
 		{
-			DrawDebugLine(GetWorld(), OutPath[i], OutPath[i+1], FColor::Red, true, -1, 0, 20.0f);
+			DrawDebugLine(GetWorld(), OutPath[i], OutPath[i + 1], FColor::Red, true, -1, 0, 20.0f);
 		}
 	}
 }
