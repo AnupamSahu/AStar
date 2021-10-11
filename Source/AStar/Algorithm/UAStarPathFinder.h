@@ -72,11 +72,11 @@ protected:
 
 	// If true, 8 Neighbors are scanned instead of 4
 	UPROPERTY(EditAnywhere, Category = "Path Finding Settings")
-	bool bAllowDiagonal = false;
+	bool bAllowDiagonal = true;
 
 	// If true, the Path is drawn on Screen
 	UPROPERTY(EditAnywhere, Category = "Debug Settings")
-	bool bDebugPath = false;
+	bool bDebugPath = true;
 
 	// If true, visited MapNode display their FCosts
 	UPROPERTY(EditAnywhere, Category = "Debug Settings")
