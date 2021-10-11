@@ -35,10 +35,10 @@ public:
 
 public:
 	
-	// Called when the Grid is generate
+	// Fired when the Grid is generated
 	FOnGridGenerated OnGridGenerated;
 
-	// Called when the Grid is cleared
+	// Fired when the Grid is cleared
 	FOnGridCleared OnGridCleared;
 	
 protected:

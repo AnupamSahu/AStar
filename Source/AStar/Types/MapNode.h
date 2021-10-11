@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "MapNode.generated.h"
 
-// An encapsulation of a Grid Location in terms of indices.
+// Encapsulation of a Grid Location in terms of indices.
 struct FMapLocation
 {
 	FMapLocation() = default;
@@ -21,14 +21,16 @@ struct FMapLocation
 };
 
 /**
- * Contains information of an Element in the Grid,
- * namely, World Location, Index Positions in the Grid,
- * Walkability, and its FCost.
+ * Contains information of a Node on the Grid :
+ * 1. Costs
+ * 2. Walkablity
+ * 3. Parent
+ * 4. Locations - World and Map
+ * 5. Target Flag
  */
 USTRUCT(BlueprintType)
 struct ASTAR_API FMapNode
 {
-	
 	GENERATED_BODY()
 
 	// Compares two FGridElements for equality by comparing their GridLocations
@@ -62,9 +64,12 @@ struct ASTAR_API FMapNode
 
 	// If True this Element is the Destination
 	bool bIsTarget = false;
-	
 };
 
+// Predicate Struct for choosing the most optimal path.
+// Picks the most optimal MapNode
+// by choosing the one with least FCost,
+// if FCosts are equal, the one with the lowest GCost is chosen
 struct FMostOptimalNode
 {
 	bool operator()(const FMapNode& A, const FMapNode& B) const

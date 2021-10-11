@@ -2,7 +2,6 @@
 
 #include "GridLevelScript.h"
 #include "BlockActor.h"
-#include "DrawDebugHelpers.h"
 
 void AGridLevelScript::GenerateGrid()
 {
@@ -28,7 +27,7 @@ void AGridLevelScript::GenerateGrid()
 			}
 			Location += FVector::RightVector * MinimumSeparation;
 		}
-		Location += -FVector::ForwardVector * MinimumSeparation;
+		Location += FVector::ForwardVector * MinimumSeparation;
 		Location.Y = GridOrigin.Y;
 	}
 
@@ -104,7 +103,7 @@ bool AGridLevelScript::ConvertWorldToGridLocation(const FVector& WorldLocation, 
 
 	const FVector& RelativeWorldLocation = WorldLocation - GridOrigin;
 	
-	OutGridLocation.X = -(RelativeWorldLocation.X / MinimumSeparation);
+	OutGridLocation.X = (RelativeWorldLocation.X / MinimumSeparation);
 	OutGridLocation.Y = (RelativeWorldLocation.Y / MinimumSeparation);
 
 	return true;
@@ -112,8 +111,8 @@ bool AGridLevelScript::ConvertWorldToGridLocation(const FVector& WorldLocation, 
 
 void AGridLevelScript::SetMinMaxLocations()
 {
-	MaxWorldLocation = GridOrigin + FVector::RightVector * SizeX * MinimumSeparation;
-	MinWorldLocation = GridOrigin - FVector::RightVector * SizeX * MinimumSeparation - FVector::ForwardVector * SizeY * MinimumSeparation;
+	MaxWorldLocation = GridOrigin + FVector::RightVector * (SizeX-1) * MinimumSeparation + FVector::ForwardVector * (SizeY-1) * MinimumSeparation;
+	MinWorldLocation = GridOrigin;
 }
 
 bool AGridLevelScript::CheckWorldLocation(const FVector& WorldLocation) const

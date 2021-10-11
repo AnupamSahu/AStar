@@ -18,17 +18,15 @@ void UAStarPathFinder::BeginPlay()
 	}
 }
 
-bool UAStarPathFinder::Initialize(const FVector& StartLocation, const FVector& DestinationLocation,
-                                  TArray<FVector>& OutPath)
+bool UAStarPathFinder::Initialize(const FVector& StartLocation, const FVector& DestinationLocation, TArray<FVector>& OutPath)
 {
 	// If Map is empty, don't proceed
 	if (Map.MapBase.Num() == 0) { return false; }
-
+	
 	// Start fresh 
 	OutPath.Empty();
 	Open.Empty();
 	Closed.Empty();
-
 
 	if (!GridLevelActor->ConvertWorldToGridLocation(StartLocation, StartMapLocation)) { return false; }
 	if (!GridLevelActor->ConvertWorldToGridLocation(DestinationLocation, DestinationMapLocation)) { return false; }
@@ -42,11 +40,10 @@ bool UAStarPathFinder::Initialize(const FVector& StartLocation, const FVector& D
 	return true;
 }
 
-void UAStarPathFinder::FindPath(const FVector& StartLocation, const FVector& DestinationLocation,
-                                TArray<FVector>& OutPath)
+void UAStarPathFinder::FindPath(const FVector& StartLocation, const FVector& DestinationLocation, TArray<FVector>& OutPath)
 {
 	if (!Initialize(StartLocation, DestinationLocation, OutPath)) { return; }
-
+	
 	// While there are still MapNodes to be visited
 	while (Open.Num() > 0)
 	{
@@ -55,11 +52,14 @@ void UAStarPathFinder::FindPath(const FVector& StartLocation, const FVector& Des
 		Open.HeapPop(Current, FMostOptimalNode());
 		Closed.HeapPush(Current, FMostOptimalNode());
 
-		// If we are already at destination, just break
-		if (Current.bIsTarget)
+		if(bDebugCosts)
 		{
-			break;
+			const FString& CurrentFCost = FString::Printf(TEXT("(%.*f)"), 1, Current.FCost);
+			DrawDebugString(GetWorld(), Current.WorldLocation, *CurrentFCost, nullptr, FColor::Red, 60.0f);
 		}
+		
+		// If we are already at destination, just break
+		if (Current.bIsTarget) { break; }
 
 		// Fetch all Neighboring MapNodes of the Current MapNode
 		TArray<FMapLocation> Neighbors;
@@ -71,25 +71,31 @@ void UAStarPathFinder::FindPath(const FVector& StartLocation, const FVector& Des
 			// If Neighbor is already visited or not walkable (wall or obstacle), reject it and continue
 			FMapNode& Neighbor = Map[Neighbors[i]];
 			if (Closed.Contains(Neighbor) || !Neighbor.bIsWalkable) { continue; }
-
+			
 			// Calculate the Movement, Heuristic and The FCost 
-			const float GCost = FVector::Distance(Neighbor.WorldLocation, Current.WorldLocation);
+			const float GCost = FVector::Distance(Neighbor.WorldLocation, StartLocation);
 			const float HCost = FVector::Distance(Neighbor.WorldLocation, DestinationLocation);
 			const float NewFCost = GCost + HCost;
 
 			// If New FCost is smaller than the Neighbor's current FCost, we just found a more optimal path
-			if (NewFCost < Neighbor.FCost)
+			if (NewFCost < Neighbor.FCost || !Open.Contains(Neighbor))
 			{
+				if(bDebugCosts)
+				{
+					const FString& NeighborFCost = FString::Printf(TEXT("(%.*f)"), 1, NewFCost);
+					DrawDebugString(GetWorld(), Neighbor.WorldLocation, *NeighborFCost, nullptr, FColor::Blue, 60.0f);
+				}
+				
 				// Update path to Neighbor and its FCost 
 				Neighbor.FCost = NewFCost;
 				Neighbor.GCost = GCost;
 				Neighbor.ParentLocation = Current.MapLocation;
-			}
 
-			// Mark Neighbor as seen, we will visit it later
-			if (!Open.Contains(Neighbor))
-			{
-				Open.HeapPush(Neighbor, FMostOptimalNode());
+				// Mark Neighbor as seen, we will visit it later
+				if (!Open.Contains(Neighbor))
+				{
+					Open.HeapPush(Neighbor, FMostOptimalNode());
+				}
 			}
 		}
 	}

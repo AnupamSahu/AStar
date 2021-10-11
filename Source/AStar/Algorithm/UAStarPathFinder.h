@@ -23,7 +23,7 @@ struct FNavMap
 	{
 		return MapBase.IsValidIndex(MapLocation.X) && MapBase[MapLocation.X].IsValidIndex(MapLocation.Y);
 	}
-
+	
 	// The base Two-Dimensional array of MapNodes on which the FNavMap is built
 	TArray<TArray<FMapNode>> MapBase;
 };
@@ -37,11 +37,11 @@ struct FNavMap
  * Locations on a pre-configured grid by
  * implementing the A* Algorithm.
  */
-
 UCLASS(ClassGroup = Navigation, meta = (BlueprintSpawnableComponent))
 class ASTAR_API UAStarPathFinder : public UActorComponent
 {
 public:
+	
 	GENERATED_BODY()
 
 	// Finds a GridLevelScript
@@ -52,7 +52,7 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable)
 	virtual void FindPath(const FVector& StartLocation, const FVector& DestinationLocation, TArray<FVector>& OutPath);
-
+	
 protected:
 	
 	// Fetches an Array of MapNodes from the GridLevelScript
@@ -67,7 +67,7 @@ protected:
 
 	// Starts from Destination, backtracks to Start, filling OutPath with the Nodes travelled 
 	void TracePath(TArray<FVector>& OutPath);
-
+	
 protected:
 
 	// If true, 8 Neighbors are scanned instead of 4
@@ -77,6 +77,10 @@ protected:
 	// If true, the Path is drawn on Screen
 	UPROPERTY(EditAnywhere, Category = "Debug Settings")
 	bool bDebugPath = false;
+
+	// If true, visited MapNode display their FCosts
+	UPROPERTY(EditAnywhere, Category = "Debug Settings")
+	bool bDebugCosts = false;
 	
 protected:
 	
