@@ -17,8 +17,11 @@ void AGridLevelScript::GenerateGrid()
 			{
 				FActorSpawnParameters SpawnParameters;
 				SpawnParameters.ObjectFlags |= RF_Transient;
-				SpawnParameters.bHideFromSceneOutliner = true;
 
+#if UE_EDITOR
+				SpawnParameters.bHideFromSceneOutliner = true;
+#endif
+				
 				ABlockActor* NewBlockActor = Cast<ABlockActor>(GetWorld()->SpawnActor(BlockActorClass, &Location, &FRotator::ZeroRotator, SpawnParameters));
 				NewBlockActor->SetActorLocation(Location);
 				NewBlockActor->UpdateBlock();

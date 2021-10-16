@@ -4,14 +4,14 @@
 #include "DrawDebugHelpers.h"
 #include "AStar/Grid/GridLevelScript.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "HeuristicLibrary.h"
+#include "DistanceFunctionsLibrary.h"
 
 UAStarPathFinder::UAStarPathFinder()
 {
-	Heuristics.Add(HeuristicLibrary::GetEuclideanDistance);
-	Heuristics.Add(HeuristicLibrary::GetManhattanDistance);
-	Heuristics.Add(HeuristicLibrary::GetChebyshevDistance);
-	Heuristics.Add(HeuristicLibrary::GetOctileDistance);
+	Heuristics.Add(DistanceFunctionsLibrary::GetEuclideanDistance);
+	Heuristics.Add(DistanceFunctionsLibrary::GetManhattanDistance);
+	Heuristics.Add(DistanceFunctionsLibrary::GetChebyshevDistance);
+	Heuristics.Add(DistanceFunctionsLibrary::GetOctileDistance);
 }
 
 void UAStarPathFinder::BeginPlay()
@@ -42,7 +42,7 @@ void UAStarPathFinder::ClearMap()
 {
 	UKismetSystemLibrary::FlushDebugStrings(GetWorld());
 	UKismetSystemLibrary::FlushPersistentDebugLines(GetWorld());
-
+	
 	Map.MapBase.Empty();
 }
 
@@ -105,7 +105,6 @@ void UAStarPathFinder::FindPath(const FVector& StartLocation, const FVector& Des
 			if (Closed.Contains(Neighbor) || !Neighbor.bIsWalkable) { continue; }
 			
 			// Calculate the Movement, Heuristic and The FCost
-
 			float GCost = 0.0f;
 			float HCost = 0.0f;
 			

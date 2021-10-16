@@ -35,10 +35,7 @@ void ABlockActor::UpdateBlock()
 		IgnoreActors.Add(this);
 
 		TArray<AActor*> HitActors;
-
-		bIsNotWalkable = UKismetSystemLibrary::BoxOverlapActors(GetWorld(), GetActorLocation(),
-		                                                          BoxComponent->GetScaledBoxExtent(), ObjectTypes,
-		                                                          AActor::StaticClass(), IgnoreActors, HitActors);
+		bIsNotWalkable = UKismetSystemLibrary::BoxOverlapActors(GetWorld(), GetActorLocation(), BoxComponent->GetScaledBoxExtent(), ObjectTypes,AActor::StaticClass(), IgnoreActors, HitActors);
 		if(StaticMeshComponent != nullptr)
 		{
 			StaticMeshComponent->SetMaterial(0, bIsNotWalkable ? NonWalkableMaterial : WalkableMaterial);

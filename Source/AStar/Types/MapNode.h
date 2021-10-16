@@ -31,6 +31,7 @@ struct FMapLocation
 USTRUCT(BlueprintType)
 struct ASTAR_API FMapNode
 {
+	
 	GENERATED_BODY()
 
 	// Compares two FGridElements for equality by comparing their GridLocations
@@ -67,6 +68,7 @@ struct ASTAR_API FMapNode
 
 	// Modifies the weight of this Node
 	float WeightModifier = 0.0f;
+	
 };
 
 // Predicate Struct for choosing the most optimal path.

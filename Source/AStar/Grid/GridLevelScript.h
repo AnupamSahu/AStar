@@ -18,6 +18,7 @@ class ABlockActor;
 UCLASS()
 class ASTAR_API AGridLevelScript : public ALevelScriptActor
 {
+
 	GENERATED_BODY()
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGridGenerated);
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGridCleared);
@@ -99,4 +100,5 @@ protected:
 
 	// Stores the Maximum Location of the Grid's Bounds
 	FVector MaxWorldLocation;
+	
 };

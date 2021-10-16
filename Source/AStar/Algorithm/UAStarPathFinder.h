@@ -12,6 +12,7 @@ class AGridLevelScript;
 // Encapsulates a Two-Dimensional array of MapNodes
 struct FNavMap
 {
+
 	// Index a Node on the Map with its MapLocation
 	FMapNode& operator[](const FMapLocation& MapLocation)
 	{
@@ -40,6 +41,7 @@ struct FNavMap
 	
 	// The base Two-Dimensional array of MapNodes on which the FNavMap is built
 	TArray<TArray<FMapNode>> MapBase;
+	
 };
 
 /**
