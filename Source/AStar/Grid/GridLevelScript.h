@@ -57,6 +57,9 @@ protected:
 	// Destroys all Blocks
 	virtual void ClearGrid();
 
+	// Initializes the Grid with null ABlockActors
+	virtual void InitGrid();
+
 	// Minor Initializations
 	virtual void BeginPlay() override;
 
@@ -89,7 +92,7 @@ protected:
 protected:
 
 	// A two-dimensional array containing all Block Actors
-	TArray<TArray<ABlockActor*>> GridRows;
+	TArray<TArray<ABlockActor*>> Grid;
 
 	// Stores the Minimum Location of the Grid's Bounds
 	FVector MinWorldLocation;

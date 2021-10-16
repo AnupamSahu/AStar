@@ -64,6 +64,9 @@ struct ASTAR_API FMapNode
 
 	// If True this Element is the Destination
 	bool bIsTarget = false;
+
+	// Modifies the weight of this Node
+	float WeightModifier = 0.0f;
 };
 
 // Predicate Struct for choosing the most optimal path.

@@ -17,14 +17,19 @@ public:
 	ABlockActor();
 
 	// Sets the Block's material and Walkability based on, if its overlapping with other Actors
-	UFUNCTION(BlueprintCallable)
 	virtual void UpdateBlock();
 
 	// Returns true if this Block is Walkable, false otherwise
-	UFUNCTION(BlueprintCallable)
 	bool GetIsWalkable() const;
+
+	// Returns the WeightModifier value
+	float GetWeightModifier() const;
 	
 protected:
+
+	// Modifies the weight of the Node at this Block
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Block Settings")
+	float WeightModifier = 0.0f;
 
 	// This Material is used on a Walkable Block
 	UPROPERTY(EditAnywhere)

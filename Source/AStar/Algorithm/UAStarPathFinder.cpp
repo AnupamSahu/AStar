@@ -4,6 +4,15 @@
 #include "DrawDebugHelpers.h"
 #include "AStar/Grid/GridLevelScript.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "HeuristicLibrary.h"
+
+UAStarPathFinder::UAStarPathFinder()
+{
+	Heuristics.Add(HeuristicLibrary::GetEuclideanDistance);
+	Heuristics.Add(HeuristicLibrary::GetManhattanDistance);
+	Heuristics.Add(HeuristicLibrary::GetChebyshevDistance);
+	Heuristics.Add(HeuristicLibrary::GetOctileDistance);
+}
 
 void UAStarPathFinder::BeginPlay()
 {
@@ -14,12 +23,35 @@ void UAStarPathFinder::BeginPlay()
 	if (IsValid(GridLevelActor))
 	{
 		// When the Grid is generated, update local Map
-		GridLevelActor->OnGridGenerated.AddUniqueDynamic(this, &UAStarPathFinder::UAStarPathFinder::OnGridUpdate);
+		GridLevelActor->OnGridGenerated.AddUniqueDynamic(this, &UAStarPathFinder::OnGridUpdate);
+
+		// When the Grid is cleared, clear local Map
+		GridLevelActor->OnGridCleared.AddUniqueDynamic(this, &UAStarPathFinder::OnGridClear);
 	}
+}
+
+void UAStarPathFinder::UpdateMap()
+{
+	if (IsValid(GridLevelActor))
+	{
+		GridLevelActor->GetGrid(Map.MapBase);
+	}
+}
+
+void UAStarPathFinder::ClearMap()
+{
+	UKismetSystemLibrary::FlushDebugStrings(GetWorld());
+	UKismetSystemLibrary::FlushPersistentDebugLines(GetWorld());
+
+	Map.MapBase.Empty();
 }
 
 bool UAStarPathFinder::Initialize(const FVector& StartLocation, const FVector& DestinationLocation, TArray<FVector>& OutPath)
 {
+	ClearMap();
+	
+	UpdateMap();
+
 	// If Map is empty, don't proceed
 	if (Map.MapBase.Num() == 0) { return false; }
 	
@@ -27,7 +59,7 @@ bool UAStarPathFinder::Initialize(const FVector& StartLocation, const FVector& D
 	OutPath.Empty();
 	Open.Empty();
 	Closed.Empty();
-
+	
 	if (!GridLevelActor->ConvertWorldToGridLocation(StartLocation, StartMapLocation)) { return false; }
 	if (!GridLevelActor->ConvertWorldToGridLocation(DestinationLocation, DestinationMapLocation)) { return false; }
 
@@ -36,7 +68,7 @@ bool UAStarPathFinder::Initialize(const FVector& StartLocation, const FVector& D
 
 	// Initialize the Open Array with the Start MapNode
 	Open.HeapPush(Map[StartMapLocation], FMostOptimalNode());
-
+	
 	return true;
 }
 
@@ -72,11 +104,24 @@ void UAStarPathFinder::FindPath(const FVector& StartLocation, const FVector& Des
 			FMapNode& Neighbor = Map[Neighbors[i]];
 			if (Closed.Contains(Neighbor) || !Neighbor.bIsWalkable) { continue; }
 			
-			// Calculate the Movement, Heuristic and The FCost 
-			const float GCost = FVector::Distance(Neighbor.WorldLocation, StartLocation);
-			const float HCost = FVector::Distance(Neighbor.WorldLocation, DestinationLocation);
-			const float NewFCost = GCost + HCost;
+			// Calculate the Movement, Heuristic and The FCost
 
+			float GCost = 0.0f;
+			float HCost = 0.0f;
+			
+			if(Heuristics.IsValidIndex(HeuristicIndex))
+			{
+				GCost = Heuristics[HeuristicIndex](Neighbor.WorldLocation, StartLocation);
+				HCost = Heuristics[HeuristicIndex](Neighbor.WorldLocation, DestinationLocation);
+			}
+			else
+			{
+				GCost = FVector::Distance(Neighbor.WorldLocation, StartLocation);
+				HCost = FVector::Distance(Neighbor.WorldLocation, DestinationLocation);
+			}
+
+			const float NewFCost = GCost + HCost;
+			
 			// If New FCost is smaller than the Neighbor's current FCost, we just found a more optimal path
 			if (NewFCost < Neighbor.FCost || !Open.Contains(Neighbor))
 			{
@@ -103,12 +148,22 @@ void UAStarPathFinder::FindPath(const FVector& StartLocation, const FVector& Des
 	TracePath(OutPath);
 }
 
+void UAStarPathFinder::ChooseHeuristic(int32 Index)
+{
+	HeuristicIndex = Index;
+}
+
+void UAStarPathFinder::SetAllowDiagonal(bool bValue)
+{
+	bAllowDiagonal = bValue;
+}
+
 void UAStarPathFinder::TracePath(TArray<FVector>& OutPath)
 {
 	// Set the Current MapNode as the Destination MapNode
 	FMapNode& Current = Map[DestinationMapLocation];
 
-	// While we haven't arrived at the Starting MapNode and the Current MapNode has a valid Parent (a Path really exists)
+	// If we haven't arrived at the Starting MapNode and the Current MapNode has a valid Parent (a Path really exists)
 	while (Current != Map[StartMapLocation] && Map.IsValidLocation(Current.ParentLocation))
 	{
 		// Add this MapNode to the Path
@@ -116,10 +171,9 @@ void UAStarPathFinder::TracePath(TArray<FVector>& OutPath)
 		// Set Current to the Parent of this MapNode
 		Current = Map[Current.ParentLocation];
 	}
-
+	
 	if (bDebugPath)
 	{
-		UKismetSystemLibrary::FlushPersistentDebugLines(GetWorld());
 		for (int32 i = 0; i < OutPath.Num() - 1; ++i)
 		{
 			DrawDebugLine(GetWorld(), OutPath[i], OutPath[i + 1], FColor::Red, true, -1, 0, 20.0f);
@@ -134,6 +188,11 @@ void UAStarPathFinder::OnGridUpdate()
 	{
 		GridLevelActor->GetGrid(Map.MapBase);
 	}
+}
+
+void UAStarPathFinder::OnGridClear()
+{
+	ClearMap();
 }
 
 void UAStarPathFinder::GetNeighbors(const FMapLocation& Target, TArray<FMapLocation>& OutNeighborLocations)

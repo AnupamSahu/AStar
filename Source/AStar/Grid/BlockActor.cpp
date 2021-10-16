@@ -39,7 +39,6 @@ void ABlockActor::UpdateBlock()
 		bIsNotWalkable = UKismetSystemLibrary::BoxOverlapActors(GetWorld(), GetActorLocation(),
 		                                                          BoxComponent->GetScaledBoxExtent(), ObjectTypes,
 		                                                          AActor::StaticClass(), IgnoreActors, HitActors);
-		
 		if(StaticMeshComponent != nullptr)
 		{
 			StaticMeshComponent->SetMaterial(0, bIsNotWalkable ? NonWalkableMaterial : WalkableMaterial);
@@ -50,4 +49,9 @@ void ABlockActor::UpdateBlock()
 bool ABlockActor::GetIsWalkable() const
 {
 	return !bIsNotWalkable;
+}
+
+float ABlockActor::GetWeightModifier() const
+{
+	return WeightModifier;
 }

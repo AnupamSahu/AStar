@@ -23,6 +23,20 @@ struct FNavMap
 	{
 		return MapBase.IsValidIndex(MapLocation.X) && MapBase[MapLocation.X].IsValidIndex(MapLocation.Y);
 	}
+
+	void ResetFCosts()
+	{
+		for(int32 i=0; i<MapBase.Num(); ++i)
+		{
+			for(int32 j=0; j<MapBase[i].Num(); ++j)
+			{
+				FMapNode& MapNode = MapBase[i][j];
+				MapNode.FCost = BIG_NUMBER;
+				MapNode.GCost = BIG_NUMBER;
+				MapNode.ParentLocation = {};
+			}
+		}
+	}
 	
 	// The base Two-Dimensional array of MapNodes on which the FNavMap is built
 	TArray<TArray<FMapNode>> MapBase;
@@ -44,6 +58,8 @@ public:
 	
 	GENERATED_BODY()
 
+	UAStarPathFinder();
+	
 	// Finds a GridLevelScript
 	virtual void BeginPlay() override;
 
@@ -53,11 +69,29 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual void FindPath(const FVector& StartLocation, const FVector& DestinationLocation, TArray<FVector>& OutPath);
 	
-protected:
+	// Selects a Heuristic Function identified by an Index
+	UFUNCTION(BlueprintCallable)
+	void ChooseHeuristic(int32 Index);
+
+	// Selects a Heuristic Function identified by an Index
+	UFUNCTION(BlueprintCallable)
+	void SetAllowDiagonal(bool bValue);
 	
+protected:
+
 	// Fetches an Array of MapNodes from the GridLevelScript
+	void UpdateMap();
+
+	// Empties the Map and flushes Debug Strings / Lines
+	void ClearMap();
+
+	// Calls UpdateMap()
 	UFUNCTION()
 	void OnGridUpdate();
+
+	// Calls ClearMap()
+	UFUNCTION()
+	void OnGridClear();
 
 	// Finds MapNodes Neighboring a given MapNode
 	virtual void GetNeighbors(const FMapLocation& Target, TArray<FMapLocation>& OutNeighborLocations);
@@ -71,8 +105,7 @@ protected:
 protected:
 
 	// If true, 8 Neighbors are scanned instead of 4
-	UPROPERTY(EditAnywhere, Category = "Path Finding Settings")
-	bool bAllowDiagonal = true;
+	bool bAllowDiagonal = false;
 
 	// If true, the Path is drawn on Screen
 	UPROPERTY(EditAnywhere, Category = "Debug Settings")
@@ -88,6 +121,12 @@ protected:
 	UPROPERTY(Transient)
 	AGridLevelScript* GridLevelActor;
 
+	// An array containing Heuristic Functions
+	TArray<TFunction<float(const FVector&,const FVector&)>> Heuristics;
+
+	// Index of the Heuristic Function currently chosen
+	uint32 HeuristicIndex = 0;
+	
 	// A Two-Dimensional array containing MapNodes created by the GridLevelActor
 	FNavMap Map;
 

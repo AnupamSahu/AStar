@@ -6,6 +6,7 @@
 void AGridLevelScript::GenerateGrid()
 {
 	ClearGrid();
+	InitGrid();
 
 	FVector Location = GridOrigin;
 	for (uint32 i = 0; i < SizeX; ++i)
@@ -18,12 +19,11 @@ void AGridLevelScript::GenerateGrid()
 				SpawnParameters.ObjectFlags |= RF_Transient;
 				SpawnParameters.bHideFromSceneOutliner = true;
 
-				ABlockActor* NewBlockActor = Cast<ABlockActor>(
-					GetWorld()->SpawnActor(BlockActorClass, &Location, &FRotator::ZeroRotator, SpawnParameters));
+				ABlockActor* NewBlockActor = Cast<ABlockActor>(GetWorld()->SpawnActor(BlockActorClass, &Location, &FRotator::ZeroRotator, SpawnParameters));
 				NewBlockActor->SetActorLocation(Location);
 				NewBlockActor->UpdateBlock();
 
-				GridRows[i].Add(NewBlockActor);
+				Grid[i].Add(NewBlockActor);
 			}
 			Location += FVector::RightVector * MinimumSeparation;
 		}
@@ -38,9 +38,9 @@ void AGridLevelScript::GenerateGrid()
 
 void AGridLevelScript::ClearGrid()
 {
-	for (int32 i = 0; i < GridRows.Num(); ++i)
+	for (int32 i = 0; i < Grid.Num(); ++i)
 	{
-		TArray<ABlockActor*> GridCol = GridRows[i];
+		TArray<ABlockActor*>& GridCol = Grid[i];
 		for (int32 j = 0; j < GridCol.Num(); ++j)
 		{
 			if (IsValid(GridCol[j]))
@@ -49,10 +49,15 @@ void AGridLevelScript::ClearGrid()
 			}
 		}
 	}
-	
-	GridRows.Init(TArray<ABlockActor*>(), SizeX);
 
+	Grid.Init(TArray<ABlockActor*>(), 0);
+	
 	OnGridCleared.Broadcast();
+}
+
+void AGridLevelScript::InitGrid()
+{
+	Grid.Init(TArray<ABlockActor*>(), SizeX);
 }
 
 void AGridLevelScript::BeginPlay()
@@ -62,10 +67,16 @@ void AGridLevelScript::BeginPlay()
 
 void AGridLevelScript::GetGrid(TArray<TArray<FMapNode>>& OutGrid) const
 {
-	const int32 RowSize = GridRows.Num();
-	const int32 ColSize = GridRows[0].Num();
-
 	OutGrid.Empty();
+	
+	const int32 RowSize = Grid.Num();
+	if(RowSize == 0)
+	{
+		return;
+	}
+
+	const int32 ColSize = Grid[0].Num();
+
 	OutGrid.Init(TArray<FMapNode>(), RowSize);
 	for(int32 i=0; i<OutGrid.Num(); ++i)
 	{
@@ -77,9 +88,12 @@ void AGridLevelScript::GetGrid(TArray<TArray<FMapNode>>& OutGrid) const
 		for (int32 j = 0; j < ColSize; ++j)
 		{
 			FMapNode GridElement;
-			GridElement.WorldLocation = GridRows[i][j]->GetActorLocation();
+			ABlockActor* BlockActor = Grid[i][j];
+			
 			GridElement.MapLocation = FMapLocation(i, j);
-			GridElement.bIsWalkable = GridRows[i][j]->GetIsWalkable();
+			GridElement.WorldLocation = BlockActor->GetActorLocation();
+			GridElement.bIsWalkable = BlockActor->GetIsWalkable();
+			GridElement.WeightModifier = BlockActor->GetWeightModifier();
 
 			OutGrid[i][j] = GridElement;
 		}
@@ -88,7 +102,7 @@ void AGridLevelScript::GetGrid(TArray<TArray<FMapNode>>& OutGrid) const
 
 bool AGridLevelScript::CheckGridLocation(const FMapLocation& GridLocation) const
 {
-	return GridRows.IsValidIndex(GridLocation.X) && GridRows[GridLocation.X].IsValidIndex(GridLocation.Y);
+	return Grid.IsValidIndex(GridLocation.X) && Grid[GridLocation.X].IsValidIndex(GridLocation.Y);
 }
 
 bool AGridLevelScript::ConvertWorldToGridLocation(const FVector& WorldLocation, FMapLocation& OutGridLocation) const
