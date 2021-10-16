@@ -7,4 +7,5 @@
 
 Resources : 
 https://www.youtube.com/watch?v=-L-WgKMFuhE&t=595s
+
 http://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html
