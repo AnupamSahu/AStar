@@ -1,6 +1,6 @@
 # AStar
  
- An implementation of the popular Best-First Search Path Finding Algortihm, A*.
+ A simple implementation of the popular Best-First Search Path Finding Algortihm, A*.
  Made with Unreal Engine 4 and C++. 
  
-![image](https://user-images.githubusercontent.com/35849508/136799335-5571b7af-d3dc-48c1-9e3f-a2f3b493f58c.png)
+![image](https://user-images.githubusercontent.com/35849508/137593168-89b854fe-6575-46a8-87ea-8b031422611e.png)
