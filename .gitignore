@@ -1,9 +1,6 @@
 # Visual Studio 2015 user specific files
 .vs/
 
-# Rider for Unreal Engine
-.idea/
-
 # Compiled Object files
 *.slo
 *.lo
@@ -76,19 +73,12 @@ Plugins/*/Intermediate/*
 # Cache files for the editor to use
 DerivedDataCache/*
 
-# Default ignored files
-/shelf/
-/workspace.xml
+# Rider
+.idea/
 
-# Rider ignored files
-/modules.xml
-/contentModel.xml
-/projectSettingsUpdater.xml
-/.idea.AStar.iml
+# Developer plugins
+Plugins/Developer
+.vsconfig
 
-# Datasource local storage ignored files
-/dataSources/
-/dataSources.local.xml
-
-# Editor-based HTTP Client requests
-/httpRequests/
+# Hololens
+Platforms/HoloLens/Config/HoloLensEngine.ini
