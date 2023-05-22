@@ -92,7 +92,7 @@ void UAStarPathFinder::CreatePath(const FAStarGraphNode* Start, const FAStarGrap
 
 	Out_Path.Add(Current);
 	
-	while(Current != Start)
+	while(Current && Current != Start)
 	{
 		Out_Path.Add(Current->Parent);
 		Current = Current->Parent;

@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "AStar/Types/MapNode.h"
-#include "UAStarPathFinder.generated.h"
 
 /**
  * The A* Algorithm is an advanced BFS algorithm
@@ -15,13 +14,10 @@
  * Locations on a pre-configured grid by
  * implementing the A* Algorithm.
  */
-UCLASS(ClassGroup = Navigation, meta = (BlueprintSpawnableComponent))
-class ASTAR_API UAStarPathFinder : public UActorComponent
+class ASTAR_API UAStarPathFinder
 {
 public:
 	
-	GENERATED_BODY()
-
 	UAStarPathFinder();
 	
 	/** Provides an array of MapNodes, given a StartLocation and a DestinationLocation in World Coordinates.

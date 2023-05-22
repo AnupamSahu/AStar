@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "BlockActor.h"
+#include "AStar/Algorithm/UAStarPathFinder.h"
 #include "AStar/Types/MapNode.h"
-#include "Engine/LevelScriptActor.h"
 #include "AStarNavVolume.generated.h"
 
 // Forward Declarations
@@ -24,7 +24,7 @@ struct FGridNode
  * The grid acts like a navigation region for AStar Pathfinding.
  */
 UCLASS()
-class ASTAR_API AAStarNavVolume : public ALevelScriptActor
+class ASTAR_API AAStarNavVolume : public AActor
 {
 
 	GENERATED_BODY()
@@ -33,20 +33,23 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	virtual void GenerateGrid();
-	
-	UFUNCTION(BlueprintCallable)
-	virtual void ResetGrid();
+	void CreateLinks();
 
+	UFUNCTION(BlueprintCallable)
+	void TracePath(const FVector& Start, const FVector& Destination);
+	
 private:
+
+	virtual void ResetGrid();
 
 	bool IsValidGridLocation(uint32 Row, uint32 Column) const;
 
-	void ConvertWorldToGridLocation(const FVector& WorldLocation, int32& Row, int32& Column) const;
+	bool ConvertWorldToGridLocation(const FVector& WorldLocation, int32& Row, int32& Column) const;
 	
 	void SetMinMaxLocations();
 	
 	bool CheckWorldLocation(const FVector& WorldLocation) const;
-
+	
 	void LinkNodes(FGridNode& TargetNode, uint32 FromRow, uint32 FromColumn);
 
 	ABlockActor* SpawnBlockActor(const FVector& Location) const;
@@ -79,5 +82,7 @@ private:
 	FVector MinWorldLocation;
 
 	FVector MaxWorldLocation;
+
+	UAStarPathFinder PathFinder;
 	
 };
