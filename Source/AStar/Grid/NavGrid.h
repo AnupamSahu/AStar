@@ -35,6 +35,7 @@ public:
 	void TracePath(const ABlockActor* Start, const ABlockActor* Destination);
 	
 protected:
+	
 	ABlockActor* SpawnBlockActor(const FVector& Location) const;
 	
 	UFUNCTION(BlueprintCallable)

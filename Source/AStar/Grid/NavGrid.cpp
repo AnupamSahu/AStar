@@ -19,7 +19,7 @@ void AGridLevelScript::TracePath(const ABlockActor* Start, const ABlockActor* De
 	const FGridNode* DestinationNode = nullptr;
 	for(const TArray<FGridNode>& Row : BlockGrid)
 	{
-		DestinationNode = Row.FindByPredicate([Start](const FGridNode& Other){ return Other.Block == Start;});
+		DestinationNode = Row.FindByPredicate([Destination](const FGridNode& Other){ return Other.Block == Destination;});
 		if(DestinationNode)
 		{
 			break;
@@ -33,6 +33,17 @@ void AGridLevelScript::TracePath(const ABlockActor* Start, const ABlockActor* De
 		
 		UAStarPathFinder PathFinder;
 		PathFinder.FindPath(&StartNode->AStarNode, &DestinationNode->AStarNode, Path);
+
+		if(Path.Num() <= 1)
+		{
+			return;
+		}
+		
+		const UWorld* World = GetWorld();
+		for(int32 Index = 0; Index < Path.Num() - 1; ++Index)
+		{
+			DrawDebugLine(World, Path[Index]->Location, Path[Index + 1]->Location, FColor::Red, true, -1, 0, 10.0f);
+		}
 	}
 }
 
@@ -54,6 +65,8 @@ ABlockActor* AGridLevelScript::SpawnBlockActor(const FVector& Location) const
 
 void AGridLevelScript::GenerateGrid()
 {
+	verifyf(BlockActor != nullptr, TEXT("BlockActor is not set."));
+
 	ResetGrid();
 	
 	FVector Location = Origin;
@@ -61,16 +74,14 @@ void AGridLevelScript::GenerateGrid()
 	{
 		for (uint32 Column = 0; Column < Size; ++Column)
 		{
-			if (BlockActor != nullptr)
-			{
-				ABlockActor* NewBlockActor = SpawnBlockActor(Location);
-				BlockGrid[Row].Add({NewBlockActor, FAStarGraphNode(Location)});
+			ABlockActor* NewBlockActor = SpawnBlockActor(Location);
+			BlockGrid[Row].Add({NewBlockActor, FAStarGraphNode(Location)});
 
-				FGridNode& NewNode = BlockGrid.Last().Last();
-				LinkNodes(NewNode, Row, Column - 1);
-				LinkNodes(NewNode, Row - 1, Column - 1);
-				LinkNodes(NewNode, Row - 1, Column);
-			}
+			FGridNode& NewNode = BlockGrid.Last().Last();
+			LinkNodes(NewNode, Row, Column - 1);
+			LinkNodes(NewNode, Row - 1, Column - 1);
+			LinkNodes(NewNode, Row - 1, Column);
+			
 			Location += FVector::RightVector * Separation;
 		}
 		Location += FVector::ForwardVector * Separation;
