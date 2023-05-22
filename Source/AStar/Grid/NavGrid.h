@@ -30,25 +30,26 @@ class ASTAR_API AGridLevelScript : public ALevelScriptActor
 	GENERATED_BODY()
 
 public:
-
-	UFUNCTION(BlueprintCallable)
-	void TracePath(const ABlockActor* Start, const ABlockActor* Destination);
-	
-protected:
-	
-	ABlockActor* SpawnBlockActor(const FVector& Location) const;
 	
 	UFUNCTION(BlueprintCallable)
-	// Generates Blocks in a Grid-like arrangement 
 	virtual void GenerateGrid();
 	
+	UFUNCTION(BlueprintCallable)
+	virtual void ResetGrid();
+
+private:
+
+	bool IsValidGridLocation(uint32 Row, uint32 Column) const;
+
+	void ConvertWorldToGridLocation(const FVector& WorldLocation, int32& Row, int32& Column) const;
+	
+	void SetMinMaxLocations();
+	
+	bool CheckWorldLocation(const FVector& WorldLocation) const;
+
 	void LinkNodes(FGridNode& TargetNode, uint32 FromRow, uint32 FromColumn);
 
-	UFUNCTION(BlueprintCallable)
-	// Destroys all Blocks
-	virtual void ResetGrid();
-	
-	bool IsValidGridLocation(uint32 Row, uint32 Column) const;
+	ABlockActor* SpawnBlockActor(const FVector& Location) const;
 
 protected:
 
@@ -72,4 +73,11 @@ protected:
 
 	// A two-dimensional array containing all Block Actors
 	TArray<TArray<FGridNode>> BlockGrid;
+	
+private:
+
+	FVector MinWorldLocation;
+
+	FVector MaxWorldLocation;
+	
 };

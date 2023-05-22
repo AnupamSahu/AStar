@@ -4,49 +4,6 @@
 #include "BlockActor.h"
 #include "AStar/Algorithm/UAStarPathFinder.h"
 
-void AGridLevelScript::TracePath(const ABlockActor* Start, const ABlockActor* Destination)
-{
-	FGridNode* StartNode = nullptr;
-	for(TArray<FGridNode>& Row : BlockGrid)
-	{
-		StartNode = Row.FindByPredicate([Start](const FGridNode& Other){ return Other.Block == Start;});
-		if(StartNode)
-		{
-			break;
-		}
-	}
-
-	const FGridNode* DestinationNode = nullptr;
-	for(const TArray<FGridNode>& Row : BlockGrid)
-	{
-		DestinationNode = Row.FindByPredicate([Destination](const FGridNode& Other){ return Other.Block == Destination;});
-		if(DestinationNode)
-		{
-			break;
-		}
-	}
-
-
-	if(StartNode && DestinationNode)
-	{
-		TArray<const FAStarGraphNode*> Path;
-		
-		UAStarPathFinder PathFinder;
-		PathFinder.FindPath(&StartNode->AStarNode, &DestinationNode->AStarNode, Path);
-
-		if(Path.Num() <= 1)
-		{
-			return;
-		}
-		
-		const UWorld* World = GetWorld();
-		for(int32 Index = 0; Index < Path.Num() - 1; ++Index)
-		{
-			DrawDebugLine(World, Path[Index]->Location, Path[Index + 1]->Location, FColor::Red, true, -1, 0, 10.0f);
-		}
-	}
-}
-
 ABlockActor* AGridLevelScript::SpawnBlockActor(const FVector& Location) const
 {
 	FActorSpawnParameters SpawnParameters;
@@ -116,4 +73,32 @@ void AGridLevelScript::ResetGrid()
 bool AGridLevelScript::IsValidGridLocation(const uint32 Row, const uint32 Column) const
 {
 	return BlockGrid.IsValidIndex(Row) && BlockGrid.Num() > 0 && BlockGrid[0].IsValidIndex(Column);
+}
+
+void AGridLevelScript::ConvertWorldToGridLocation(const FVector& WorldLocation, int32& Row, int32& Column) const
+{
+	Row = -1;
+	Column = -1;
+
+	if (!CheckWorldLocation(WorldLocation))
+	{
+		return;
+	}
+
+	const FVector& RelativeWorldLocation = WorldLocation - Origin;
+	
+	Row = (RelativeWorldLocation.X / Separation);
+	Column = (RelativeWorldLocation.Y / Separation);
+}
+
+void AGridLevelScript::SetMinMaxLocations()
+{
+	MaxWorldLocation = Origin + FVector::RightVector * (Size - 1) * Separation + FVector::ForwardVector * (Size - 1) * Separation;
+	MinWorldLocation = Origin;
+}
+
+bool AGridLevelScript::CheckWorldLocation(const FVector& WorldLocation) const
+{
+	return WorldLocation.X >= MinWorldLocation.X && WorldLocation.Y >= MinWorldLocation.Y
+		&& WorldLocation.X <= MaxWorldLocation.X && WorldLocation.Y <= MaxWorldLocation.Y;
 }
