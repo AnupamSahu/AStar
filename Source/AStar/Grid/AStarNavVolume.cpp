@@ -1,10 +1,10 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "NavGrid.h"
+#include "AStarNavVolume.h"
 #include "BlockActor.h"
 #include "AStar/Algorithm/UAStarPathFinder.h"
 
-ABlockActor* AGridLevelScript::SpawnBlockActor(const FVector& Location) const
+ABlockActor* AAStarNavVolume::SpawnBlockActor(const FVector& Location) const
 {
 	FActorSpawnParameters SpawnParameters;
 	SpawnParameters.ObjectFlags |= RF_Transient;
@@ -20,7 +20,7 @@ ABlockActor* AGridLevelScript::SpawnBlockActor(const FVector& Location) const
 	return NewBlockActor;
 }
 
-void AGridLevelScript::GenerateGrid()
+void AAStarNavVolume::GenerateGrid()
 {
 	verifyf(BlockActor != nullptr, TEXT("BlockActor is not set."));
 
@@ -46,7 +46,7 @@ void AGridLevelScript::GenerateGrid()
 	}
 }
 
-void AGridLevelScript::LinkNodes(FGridNode& TargetNode, const uint32 FromRow, const uint32 FromColumn)
+void AAStarNavVolume::LinkNodes(FGridNode& TargetNode, const uint32 FromRow, const uint32 FromColumn)
 {
 	if(IsValidGridLocation(FromRow, FromColumn))
 	{
@@ -54,7 +54,7 @@ void AGridLevelScript::LinkNodes(FGridNode& TargetNode, const uint32 FromRow, co
 	}
 }
 
-void AGridLevelScript::ResetGrid()
+void AAStarNavVolume::ResetGrid()
 {
 	for (const TArray<FGridNode>& Row : BlockGrid)
 	{
@@ -70,12 +70,12 @@ void AGridLevelScript::ResetGrid()
 	BlockGrid.Init(TArray<FGridNode>(), Size);
 }
 
-bool AGridLevelScript::IsValidGridLocation(const uint32 Row, const uint32 Column) const
+bool AAStarNavVolume::IsValidGridLocation(const uint32 Row, const uint32 Column) const
 {
 	return BlockGrid.IsValidIndex(Row) && BlockGrid.Num() > 0 && BlockGrid[0].IsValidIndex(Column);
 }
 
-void AGridLevelScript::ConvertWorldToGridLocation(const FVector& WorldLocation, int32& Row, int32& Column) const
+void AAStarNavVolume::ConvertWorldToGridLocation(const FVector& WorldLocation, int32& Row, int32& Column) const
 {
 	Row = -1;
 	Column = -1;
@@ -91,13 +91,13 @@ void AGridLevelScript::ConvertWorldToGridLocation(const FVector& WorldLocation, 
 	Column = (RelativeWorldLocation.Y / Separation);
 }
 
-void AGridLevelScript::SetMinMaxLocations()
+void AAStarNavVolume::SetMinMaxLocations()
 {
 	MaxWorldLocation = Origin + FVector::RightVector * (Size - 1) * Separation + FVector::ForwardVector * (Size - 1) * Separation;
 	MinWorldLocation = Origin;
 }
 
-bool AGridLevelScript::CheckWorldLocation(const FVector& WorldLocation) const
+bool AAStarNavVolume::CheckWorldLocation(const FVector& WorldLocation) const
 {
 	return WorldLocation.X >= MinWorldLocation.X && WorldLocation.Y >= MinWorldLocation.Y
 		&& WorldLocation.X <= MaxWorldLocation.X && WorldLocation.Y <= MaxWorldLocation.Y;

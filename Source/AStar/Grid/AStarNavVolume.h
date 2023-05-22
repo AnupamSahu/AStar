@@ -6,7 +6,7 @@
 #include "BlockActor.h"
 #include "AStar/Types/MapNode.h"
 #include "Engine/LevelScriptActor.h"
-#include "NavGrid.generated.h"
+#include "AStarNavVolume.generated.h"
 
 // Forward Declarations
 class ABlockActor;
@@ -24,7 +24,7 @@ struct FGridNode
  * The grid acts like a navigation region for AStar Pathfinding.
  */
 UCLASS()
-class ASTAR_API AGridLevelScript : public ALevelScriptActor
+class ASTAR_API AAStarNavVolume : public ALevelScriptActor
 {
 
 	GENERATED_BODY()
