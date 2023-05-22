@@ -13,6 +13,11 @@ UAStarPathFinder::UAStarPathFinder()
 
 void UAStarPathFinder::FindPath(FAStarGraphNode* Start, const FAStarGraphNode* Destination, TArray<const FAStarGraphNode*>& OutPath)
 {
+	if(!ensureMsgf(Heuristics.IsValidIndex(HeuristicIndex), TEXT("Invalid HeuristicIndex!")))
+	{
+		return;
+	}
+	
 	Open.Reset();
 	Open.Push(Start);
 	
@@ -42,18 +47,8 @@ void UAStarPathFinder::FindPath(FAStarGraphNode* Start, const FAStarGraphNode* D
 			}
 			
 			// Calculate the Movement, Heuristic and The FCost
-			float GCost, HCost;
-			
-			if(Heuristics.IsValidIndex(HeuristicIndex))
-			{
-				GCost = Heuristics[HeuristicIndex](Neighbor->Location, Start->Location);
-				HCost = Heuristics[HeuristicIndex](Neighbor->Location, Destination->Location);
-			}
-			else
-			{
-				GCost = FVector::Distance(Neighbor->Location, Start->Location);
-				HCost = FVector::Distance(Neighbor->Location, Destination->Location);
-			}
+			const float GCost = Heuristics[HeuristicIndex](Neighbor->Location, Start->Location);
+			const float HCost = Heuristics[HeuristicIndex](Neighbor->Location, Destination->Location);
 
 			const float NewFCost = GCost + HCost;
 			

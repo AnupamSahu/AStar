@@ -78,7 +78,7 @@ void AAStarNavVolume::TracePath(const FVector& Start, const FVector& Destination
 			UKismetSystemLibrary::FlushPersistentDebugLines(World);
 			for(int32 Index = 0; Index < Path.Num() - 1; ++Index)
 			{
-				DrawDebugLine(World, Path[Index]->Location, Path[Index + 1]->Location, FColor::Red, true, -1, 0, 50.0f);
+				DrawDebugLine(World, Path[Index]->Location, Path[Index + 1]->Location, FColor::Blue, true, -1, 0, 50.0f);
 			}
 		}
 	}
