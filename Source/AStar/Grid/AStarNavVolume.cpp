@@ -19,6 +19,7 @@ void AAStarNavVolume::GenerateGrid()
 		{
 			ABlockActor* NewBlockActor = SpawnBlockActor(Location);
 			BlockGrid[Row].Add({NewBlockActor, FAStarGraphNode(Location)});
+			BlockGrid[Row].Last().AStarNode.bIsWalkable = NewBlockActor->GetIsWalkable();
 			Location += FVector::RightVector * Separation;
 		}
 
