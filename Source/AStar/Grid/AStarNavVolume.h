@@ -33,10 +33,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	virtual void GenerateGrid();
-	void CreateLinks();
 
 	UFUNCTION(BlueprintCallable)
-	void TracePath(const FVector& Start, const FVector& Destination);
+	void FindPath(const FVector& Start, const FVector& Destination);
 	
 private:
 
@@ -49,15 +48,17 @@ private:
 	void SetMinMaxLocations();
 	
 	bool CheckWorldLocation(const FVector& WorldLocation) const;
+
+	void CreateLinks();
 	
 	void LinkNodes(FGridNode& TargetNode, uint32 FromRow, uint32 FromColumn);
 
 	ABlockActor* SpawnBlockActor(const FVector& Location) const;
 
-protected:
+private:
 
 	// The Origin of the Grid, all Grid Blocks are placed relative to this Origin
-	UPROPERTY(EditAnywhere, Category = "Grid Settings")
+	UPROPERTY(EditAnywhere, Category = "Grid Settings", Meta = (MakeEditWidget = true))
 	FVector Origin;
 	
 	// Number of Blocks Along X Axis
@@ -72,17 +73,13 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Grid Settings")
 	TSubclassOf<ABlockActor> BlockActor;
 	
-protected:
-
 	// A two-dimensional array containing all Block Actors
 	TArray<TArray<FGridNode>> BlockGrid;
+
 	
-private:
+	FVector MinWorldLocation, MaxWorldLocation;
 
-	FVector MinWorldLocation;
-
-	FVector MaxWorldLocation;
-
+	
 	UAStarPathFinder PathFinder;
 	
 };

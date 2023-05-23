@@ -74,6 +74,11 @@ void UAStarPathFinder::FindPath(FAStarGraphNode* Start, const FAStarGraphNode* D
 	ResetNodes();
 }
 
+void UAStarPathFinder::ChooseHeuristic(int32 Index)
+{
+	HeuristicIndex = Index;
+}
+
 void UAStarPathFinder::CreatePath(const FAStarGraphNode* Start, const FAStarGraphNode* End, TArray<const FAStarGraphNode*>& Out_Path) const
 {
 	Out_Path.Reset();
@@ -102,9 +107,4 @@ void UAStarPathFinder::ResetNodes()
 	{
 		Node->Reset();
 	}
-}
-
-void UAStarPathFinder::ChooseHeuristic(int32 Index)
-{
-	HeuristicIndex = Index;
 }

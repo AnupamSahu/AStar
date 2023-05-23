@@ -31,26 +31,7 @@ void AAStarNavVolume::GenerateGrid()
 	SetMinMaxLocations();
 }
 
-void AAStarNavVolume::CreateLinks()
-{
-	for(uint32 Row = 0; Row < Size; ++Row)
-	{
-		for(uint32 Column = 0; Column < Size; ++ Column)
-		{
-			FGridNode& Node = BlockGrid[Row][Column];
-			LinkNodes(Node, Row, Column + 1);
-			LinkNodes(Node, Row + 1, Column);
-			LinkNodes(Node, Row, Column - 1);
-			LinkNodes(Node, Row - 1, Column);
-			LinkNodes(Node, Row - 1, Column + 1);
-			LinkNodes(Node, Row + 1, Column + 1);
-			LinkNodes(Node, Row + 1, Column - 1);
-			LinkNodes(Node, Row - 1, Column - 1);
-		}
-	}
-}
-
-void AAStarNavVolume::TracePath(const FVector& Start, const FVector& Destination)
+void AAStarNavVolume::FindPath(const FVector& Start, const FVector& Destination)
 {
 	FAStarGraphNode* StartNode = nullptr;
 	const FAStarGraphNode* DestinationNode = nullptr;
@@ -80,6 +61,25 @@ void AAStarNavVolume::TracePath(const FVector& Start, const FVector& Destination
 			{
 				DrawDebugLine(World, Path[Index]->Location, Path[Index + 1]->Location, FColor::Blue, true, -1, 0, 50.0f);
 			}
+		}
+	}
+}
+
+void AAStarNavVolume::CreateLinks()
+{
+	for(uint32 Row = 0; Row < Size; ++Row)
+	{
+		for(uint32 Column = 0; Column < Size; ++ Column)
+		{
+			FGridNode& Node = BlockGrid[Row][Column];
+			LinkNodes(Node, Row, Column + 1);
+			LinkNodes(Node, Row + 1, Column);
+			LinkNodes(Node, Row, Column - 1);
+			LinkNodes(Node, Row - 1, Column);
+			LinkNodes(Node, Row - 1, Column + 1);
+			LinkNodes(Node, Row + 1, Column + 1);
+			LinkNodes(Node, Row + 1, Column - 1);
+			LinkNodes(Node, Row - 1, Column - 1);
 		}
 	}
 }
