@@ -36,6 +36,8 @@ struct FAStarGraphNode : FGraphNode
 
 	float FCost = BIG_NUMBER;
 
+	float HCost = BIG_NUMBER;
+
 	bool bIsWalkable = true;
 
 	FAStarGraphNode* Parent = nullptr;
@@ -46,6 +48,6 @@ struct FMostOptimalNode
 {
 	bool operator()(const FAStarGraphNode& A, const FAStarGraphNode& B) const
 	{
-		return A.FCost == B.FCost ? A.GCost < B.GCost : A.FCost < B.FCost;
+		return A.FCost == B.FCost ? A.HCost < B.HCost : A.FCost < B.FCost;
 	}
 };

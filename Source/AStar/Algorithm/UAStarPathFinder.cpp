@@ -18,7 +18,17 @@ void UAStarPathFinder::FindPath(FAStarGraphNode* Start, const FAStarGraphNode* D
 		return;
 	}
 	
+	if(!Start->bIsWalkable)
+	{
+		return;
+	}
+
+	Start->GCost = 0.0f;
+	Start->HCost = Heuristics[HeuristicIndex](Start->Location, Destination->Location);
+	
 	Open.Reset();
+	Closed.Reset();
+
 	Open.Push(Start);
 	
 	// While there are still MapNodes to be visited
@@ -47,18 +57,16 @@ void UAStarPathFinder::FindPath(FAStarGraphNode* Start, const FAStarGraphNode* D
 			}
 			
 			// Calculate the Movement, Heuristic and The FCost
-			const float GCost = Heuristics[HeuristicIndex](Neighbor->Location, Start->Location);
-			const float HCost = Heuristics[HeuristicIndex](Neighbor->Location, Destination->Location);
-
-			const float NewFCost = GCost + HCost;
+			const float GCost = Current->GCost + Heuristics[HeuristicIndex](Neighbor->Location, Current->Location);
 			
 			// If New FCost is smaller than the Neighbor's current FCost, we just found a more optimal path
 			const bool bIsInOpen = Open.Contains(Neighbor);
-			if (NewFCost < Neighbor->FCost || !bIsInOpen)
+			if (GCost < Neighbor->GCost || !bIsInOpen)
 			{
 				// Update path to Neighbor and its FCost 
-				Neighbor->FCost = NewFCost;
 				Neighbor->GCost = GCost;
+				Neighbor->HCost =  Heuristics[HeuristicIndex](Neighbor->Location, Destination->Location);
+				Neighbor->FCost = Neighbor->GCost + Neighbor->HCost;
 				Neighbor->Parent = Current;
 
 				// Mark Neighbor as seen, we will visit it later

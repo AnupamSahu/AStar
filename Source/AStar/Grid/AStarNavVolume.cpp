@@ -27,8 +27,8 @@ void AAStarNavVolume::GenerateGrid()
 		Location.Y = Origin.Y;
 	}
 
-	CreateLinks();
 	SetMinMaxLocations();
+	CreateLinks();
 }
 
 void AAStarNavVolume::FindPath(const FVector& Start, const FVector& Destination)
@@ -59,6 +59,10 @@ void AAStarNavVolume::FindPath(const FVector& Start, const FVector& Destination)
 			UKismetSystemLibrary::FlushPersistentDebugLines(World);
 			for(int32 Index = 0; Index < Path.Num() - 1; ++Index)
 			{
+				if(!Path[Index] || !Path[Index + 1])
+				{
+					continue;
+				}
 				DrawDebugLine(World, Path[Index]->Location, Path[Index + 1]->Location, FColor::Blue, true, -1, 0, 50.0f);
 			}
 		}
