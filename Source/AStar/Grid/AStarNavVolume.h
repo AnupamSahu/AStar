@@ -36,6 +36,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void FindPath(const FVector& Start, const FVector& Destination);
+
+	UFUNCTION(BlueprintCallable)
+	void ChooseHeuristicFunction(const EHeuristic Choice);
 	
 private:
 
@@ -58,27 +61,25 @@ private:
 private:
 
 	// The Origin of the Grid, all Grid Blocks are placed relative to this Origin
-	UPROPERTY(EditAnywhere, Category = "Grid Settings", Meta = (MakeEditWidget = true))
+	UPROPERTY(EditAnywhere, Category = "Nav Volume", Meta = (MakeEditWidget = true))
 	FVector Origin;
 	
 	// Number of Blocks Along X Axis
-	UPROPERTY(EditAnywhere, Category = "Grid Settings")
+	UPROPERTY(EditAnywhere, Category = "Nav Volume")
 	uint32 Size;
 
 	// Defines the minimum separation between two blocks
-	UPROPERTY(EditAnywhere, Category = "Grid Settings")
+	UPROPERTY(EditAnywhere, Category = "Nav Volume")
 	float Separation = 100.0f;
 	
 	// An Actor that represents a Block
-	UPROPERTY(EditAnywhere, Category = "Grid Settings")
+	UPROPERTY(EditAnywhere, Category = "Nav Volume")
 	TSubclassOf<ABlockActor> BlockActor;
 	
 	// A two-dimensional array containing all Block Actors
 	TArray<TArray<FGridNode>> BlockGrid;
-
 	
 	FVector MinWorldLocation, MaxWorldLocation;
-
 	
 	UAStarPathFinder PathFinder;
 	

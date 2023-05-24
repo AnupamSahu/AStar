@@ -69,6 +69,11 @@ void AAStarNavVolume::FindPath(const FVector& Start, const FVector& Destination)
 	}
 }
 
+void AAStarNavVolume::ChooseHeuristicFunction(const EHeuristic Choice)
+{
+	PathFinder.ChooseHeuristicFunction(Choice);
+}
+
 void AAStarNavVolume::CreateLinks()
 {
 	for(uint32 Row = 0; Row < Size; ++Row)

@@ -5,6 +5,15 @@
 #include "CoreMinimal.h"
 #include "AStar/Types/MapNode.h"
 
+UENUM(BlueprintType)
+enum class EHeuristic : uint8
+{
+	Euclidean = 0,
+	Manhattan = 1,
+	Chebyshev = 2,
+	Octile = 3
+};
+
 /**
  * The A* Algorithm is an advanced BFS algorithm
  * that searches for shorter paths first rather than the longer paths.
@@ -26,7 +35,7 @@ public:
 	void FindPath(FAStarGraphNode* Start, const FAStarGraphNode* Destination, TArray<const FAStarGraphNode*>& OutPath);
 	
 	// Selects a Heuristic Function identified by an Index
-	void ChooseHeuristic(int32 Index);
+	void ChooseHeuristicFunction(const EHeuristic Choice);
 
 protected:
 
@@ -36,12 +45,10 @@ protected:
 
 protected:
 	
-	// An array containing Heuristic Functions
-	TArray<TFunction<float(const FVector&,const FVector&)>> Heuristics;
+	TMap<EHeuristic, TFunction<float(const FVector&, const FVector&)>> HeuristicsMap;
 
-	// Index of the Heuristic Function currently chosen
-	uint32 HeuristicIndex = 0;
-
+	TFunction<float(const FVector&, const FVector&)> HeuristicFunction;
+	
 	// An array of Elements that have not been visited yet
 	TArray<FAStarGraphNode*> Open;
 

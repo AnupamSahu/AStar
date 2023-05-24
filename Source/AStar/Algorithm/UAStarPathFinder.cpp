@@ -5,26 +5,23 @@
 
 UAStarPathFinder::UAStarPathFinder()
 {
-	Heuristics.Add(DistanceFunctionsLibrary::GetEuclideanDistance);
-	Heuristics.Add(DistanceFunctionsLibrary::GetManhattanDistance);
-	Heuristics.Add(DistanceFunctionsLibrary::GetChebyshevDistance);
-	Heuristics.Add(DistanceFunctionsLibrary::GetOctileDistance);
+	HeuristicsMap.Add(EHeuristic::Euclidean, DistanceFunctionsLibrary::GetEuclideanDistance);
+	HeuristicsMap.Add(EHeuristic::Manhattan, DistanceFunctionsLibrary::GetManhattanDistance);
+	HeuristicsMap.Add(EHeuristic::Chebyshev, DistanceFunctionsLibrary::GetChebyshevDistance);
+	HeuristicsMap.Add(EHeuristic::Octile, DistanceFunctionsLibrary::GetOctileDistance);
+	
+	HeuristicFunction = HeuristicsMap[EHeuristic::Euclidean];
 }
 
 void UAStarPathFinder::FindPath(FAStarGraphNode* Start, const FAStarGraphNode* Destination, TArray<const FAStarGraphNode*>& OutPath)
 {
-	if(!ensureMsgf(Heuristics.IsValidIndex(HeuristicIndex), TEXT("Invalid HeuristicIndex!")))
-	{
-		return;
-	}
-	
 	if(!Start->bIsWalkable)
 	{
 		return;
 	}
 
 	Start->GCost = 0.0f;
-	Start->HCost = Heuristics[HeuristicIndex](Start->Location, Destination->Location);
+	Start->HCost = HeuristicFunction(Start->Location, Destination->Location);
 	
 	Open.Reset();
 	Closed.Reset();
@@ -57,7 +54,7 @@ void UAStarPathFinder::FindPath(FAStarGraphNode* Start, const FAStarGraphNode* D
 			}
 			
 			// Calculate the Movement, Heuristic and The FCost
-			const float GCost = Current->GCost + Heuristics[HeuristicIndex](Neighbor->Location, Current->Location);
+			const float GCost = Current->GCost + HeuristicFunction(Neighbor->Location, Current->Location);
 			
 			// If New FCost is smaller than the Neighbor's current FCost, we just found a more optimal path
 			const bool bIsInOpen = Open.Contains(Neighbor);
@@ -65,7 +62,7 @@ void UAStarPathFinder::FindPath(FAStarGraphNode* Start, const FAStarGraphNode* D
 			{
 				// Update path to Neighbor and its FCost 
 				Neighbor->GCost = GCost;
-				Neighbor->HCost =  Heuristics[HeuristicIndex](Neighbor->Location, Destination->Location);
+				Neighbor->HCost = HeuristicFunction(Neighbor->Location, Destination->Location);
 				Neighbor->FCost = Neighbor->GCost + Neighbor->HCost;
 				Neighbor->Parent = Current;
 
@@ -82,9 +79,13 @@ void UAStarPathFinder::FindPath(FAStarGraphNode* Start, const FAStarGraphNode* D
 	ResetNodes();
 }
 
-void UAStarPathFinder::ChooseHeuristic(int32 Index)
+void UAStarPathFinder::ChooseHeuristicFunction(const EHeuristic Choice)
 {
-	HeuristicIndex = Index;
+	if(!HeuristicsMap.Contains(Choice))
+	{
+		return;
+	}
+	HeuristicFunction = HeuristicsMap[Choice];
 }
 
 void UAStarPathFinder::CreatePath(const FAStarGraphNode* Start, const FAStarGraphNode* End, TArray<const FAStarGraphNode*>& Out_Path) const
