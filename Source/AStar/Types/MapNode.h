@@ -24,18 +24,22 @@ struct FAStarGraphNode : FGraphNode
 		return Location == Other.Location && AdjacentNodes == Other.AdjacentNodes;
 	}
 
+	float FCost() const
+	{
+		return GCost + HCost;
+	}
+	
 	void Reset()
 	{
 		GCost = BIG_NUMBER;
-		FCost = BIG_NUMBER;
+		HCost = BIG_NUMBER;
+		Parent = nullptr;
 	}
 
 	FVector Location = FVector::ZeroVector;
 
 	float GCost = BIG_NUMBER;
-
-	float FCost = BIG_NUMBER;
-
+	
 	float HCost = BIG_NUMBER;
 
 	bool bIsWalkable = true;
@@ -48,6 +52,6 @@ struct FMostOptimalNode
 {
 	bool operator()(const FAStarGraphNode& A, const FAStarGraphNode& B) const
 	{
-		return A.FCost == B.FCost ? A.HCost < B.HCost : A.FCost < B.FCost;
+		return A.FCost() == B.FCost() ? A.HCost < B.HCost : A.FCost() < B.FCost();
 	}
 };

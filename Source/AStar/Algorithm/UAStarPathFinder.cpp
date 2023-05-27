@@ -15,17 +15,19 @@ UAStarPathFinder::UAStarPathFinder()
 
 void UAStarPathFinder::FindPath(FAStarGraphNode* Start, const FAStarGraphNode* Destination, TArray<const FAStarGraphNode*>& OutPath)
 {
-	if(!Start->bIsWalkable)
+	if(!Start->bIsWalkable || !Destination->bIsWalkable)
 	{
 		return;
 	}
 
-	Start->GCost = 0.0f;
-	Start->HCost = HeuristicFunction(Start->Location, Destination->Location);
-	
+	ResetNodes();
 	Open.Reset();
 	Closed.Reset();
 
+	Start->GCost = 0.0f;
+	Start->HCost = HeuristicFunction(Start->Location, Destination->Location);
+	Start->Parent = nullptr;
+	
 	Open.Push(Start);
 	
 	// While there are still MapNodes to be visited
@@ -63,9 +65,8 @@ void UAStarPathFinder::FindPath(FAStarGraphNode* Start, const FAStarGraphNode* D
 				// Update path to Neighbor and its FCost 
 				Neighbor->GCost = GCost;
 				Neighbor->HCost = HeuristicFunction(Neighbor->Location, Destination->Location);
-				Neighbor->FCost = Neighbor->GCost + Neighbor->HCost;
 				Neighbor->Parent = Current;
-
+				
 				// Mark Neighbor as seen, we will visit it later
 				if (!bIsInOpen)
 				{
@@ -76,7 +77,6 @@ void UAStarPathFinder::FindPath(FAStarGraphNode* Start, const FAStarGraphNode* D
 	}
 
 	CreatePath(Start, Destination, OutPath);
-	ResetNodes();
 }
 
 void UAStarPathFinder::ChooseHeuristicFunction(const EHeuristic Choice)
@@ -90,20 +90,13 @@ void UAStarPathFinder::ChooseHeuristicFunction(const EHeuristic Choice)
 
 void UAStarPathFinder::CreatePath(const FAStarGraphNode* Start, const FAStarGraphNode* End, TArray<const FAStarGraphNode*>& Out_Path) const
 {
+	const FAStarGraphNode* Current = End;
+	
 	Out_Path.Reset();
 	
-	const FAStarGraphNode* Current = End;
-
-	if(Current == nullptr)
+	while(Current)
 	{
-		return;
-	}
-
-	Out_Path.Add(Current);
-	
-	while(Current && Current != Start)
-	{
-		Out_Path.Add(Current->Parent);
+		Out_Path.Add(Current);
 		Current = Current->Parent;
 	}
 
