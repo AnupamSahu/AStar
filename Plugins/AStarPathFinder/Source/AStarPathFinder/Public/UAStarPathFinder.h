@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AStar/Types/MapNode.h"
+#include "MapNode.h"
 
 UENUM(BlueprintType)
 enum class EHeuristic : uint8
@@ -18,40 +18,39 @@ enum class EHeuristic : uint8
  * The A* Algorithm is an advanced BFS algorithm
  * that searches for shorter paths first rather than the longer paths.
  * It is optimal as well as a complete algorithm.
- *
- * This Component provides the shortest Path between
- * Locations on a pre-configured grid by
- * implementing the A* Algorithm.
  */
-class ASTAR_API UAStarPathFinder
+class ASTARPATHFINDER_API UAStarPathFinder
 {
 public:
 	
+	// Initialise Heuristic Functions.
 	UAStarPathFinder();
 	
-	/** Provides an array of MapNodes, given a StartLocation and a DestinationLocation in World Coordinates.
-	 *  If either StartLocation or DestinationLocation are outside the Map's bounds, an empty path is provided.
-	 */
+	// Find a path between Start and Destination node and output the result in an array of FAStarGraphNodes. 
 	void FindPath(FAStarGraphNode* Start, const FAStarGraphNode* Destination, TArray<const FAStarGraphNode*>& OutPath);
 	
-	// Selects a Heuristic Function identified by an Index
+	// Select a Heuristic Function
 	void ChooseHeuristicFunction(const EHeuristic Choice);
 
 protected:
 
-	void CreatePath(const FAStarGraphNode* Start, const FAStarGraphNode* End, TArray<const FAStarGraphNode*>& Out_Path) const;
+	// Join AStar Nodes by linking their parent nodes to form a chain that represents the path between Start and End node. 
+	void CreatePath(const FAStarGraphNode* Start, const FAStarGraphNode* Destination, TArray<const FAStarGraphNode*>& Out_Path) const;
 
-	void ResetNodes();
+	// Clear all pathfinding data and reset the graph to its original state.
+	void ResetGraph();
 
 protected:
-	
+
+	// Mapping of Heuristic functions.
 	TMap<EHeuristic, TFunction<float(const FVector&, const FVector&)>> HeuristicsMap;
 
+	// The heuristic function being used to calculate distances between two points.
 	TFunction<float(const FVector&, const FVector&)> HeuristicFunction;
-	
-	// An array of Elements that have not been visited yet
+
+	// An array of nodes that have not been visited yet.
 	TArray<FAStarGraphNode*> Open;
 
-	// An array of Elements that have been visited
+	// A set of nodes that have already been visited.
 	TSet<FAStarGraphNode*> Closed;
 };

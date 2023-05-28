@@ -8,7 +8,7 @@
  * The HeuristicLibrary is a collection of mathematical functions
  * that calculate the distance between two points in a different ways.
  */
-class ASTAR_API DistanceFunctionsLibrary
+class ASTARPATHFINDER_API DistanceFunctionsLibrary
 {
 public:
 	// Manhattan distance is calculated as the sum of the absolute differences between the two vectors.

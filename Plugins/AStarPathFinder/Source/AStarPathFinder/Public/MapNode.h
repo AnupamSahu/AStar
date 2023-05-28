@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 
+// TODO : Come back to this if you think we should add something here.
 struct FGraphNode
 {
 	TArray<FGraphNode*> AdjacentNodes;
@@ -24,11 +25,14 @@ struct FAStarGraphNode : FGraphNode
 		return Location == Other.Location && AdjacentNodes == Other.AdjacentNodes;
 	}
 
+	// FCost getter.
 	float FCost() const
 	{
+		// We don't really need extra storage for the FCost.
 		return GCost + HCost;
 	}
-	
+
+	// A clean node is a happy node.
 	void Reset()
 	{
 		GCost = BIG_NUMBER;
@@ -47,7 +51,6 @@ struct FAStarGraphNode : FGraphNode
 	FAStarGraphNode* Parent = nullptr;
 };
 
-// TODO : Rename to FMostOptimalNode
 struct FMostOptimalNode
 {
 	bool operator()(const FAStarGraphNode& A, const FAStarGraphNode& B) const

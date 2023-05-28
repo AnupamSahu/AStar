@@ -2,7 +2,6 @@
 
 #include "AStarNavVolume.h"
 #include "BlockActor.h"
-#include "AStar/Algorithm/UAStarPathFinder.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 void AAStarNavVolume::GenerateGrid()
@@ -123,10 +122,12 @@ void AAStarNavVolume::ResetGrid()
 	{
 		for (const FGridNode& Node : Row)
 		{
-			if (IsValid(Node.Block))
+			if (!IsValid(Node.Block))
 			{
-				Node.Block->Destroy();
+				continue;
 			}
+			
+			Node.Block->Destroy();
 		}
 	}
 }
