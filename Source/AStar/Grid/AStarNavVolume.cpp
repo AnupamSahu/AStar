@@ -46,31 +46,33 @@ void AAStarNavVolume::FindPath(const FVector& Start, const FVector& Destination)
 		DestinationNode = &BlockGrid[Row][Column].AStarNode;
 	}
 
-	if(StartNode && DestinationNode)
+	if(!StartNode || !DestinationNode)
 	{
-		TArray<const FAStarGraphNode*> Path;
-		PathFinder.FindPath(StartNode, DestinationNode, Path);
+		return;
+	}
 
-		if(Path.Num() > 1)
-		{
-			const UWorld* World = GetWorld();
+	TArray<const FAStarGraphNode*> Path;
+	PathFinder.FindPath(StartNode, DestinationNode, Path);
 
-			UKismetSystemLibrary::FlushPersistentDebugLines(World);
-			for(int32 Index = 0; Index < Path.Num() - 1; ++Index)
-			{
-				if(!Path[Index] || !Path[Index + 1])
-				{
-					continue;
-				}
-				DrawDebugLine(World, Path[Index]->Location, Path[Index + 1]->Location, FColor::Blue, true, -1, 0, 50.0f);
-			}
-		}
+	const UWorld* World = GetWorld();
+	UKismetSystemLibrary::FlushPersistentDebugLines(World);
+
+	for(int32 Index = 0; Index < Path.Num() - 1; ++Index)
+	{
+		DrawDebugLine(World, Path[Index]->Location, Path[Index + 1]->Location, FColor::Blue, true, -1, 0, 20.0f);
 	}
 }
 
 void AAStarNavVolume::ChooseHeuristicFunction(const EHeuristic Choice)
 {
 	PathFinder.ChooseHeuristicFunction(Choice);
+}
+
+void AAStarNavVolume::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	GenerateGrid();
 }
 
 void AAStarNavVolume::CreateLinks()

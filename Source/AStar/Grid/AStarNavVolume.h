@@ -34,10 +34,6 @@ class ASTAR_API AAStarNavVolume : public AActor
 
 public:
 
-	// Spawn collision detection blocks and map blocked and walkable areas.
-	UFUNCTION(BlueprintCallable)
-	virtual void GenerateGrid();
-
 	// Use AStar Pathfinding to find the shortest path between Start and Destination locations if they are valid walkable locations.
 	UFUNCTION(BlueprintCallable)
 	void FindPath(const FVector& Start, const FVector& Destination);
@@ -45,9 +41,21 @@ public:
 	// Select a heuristic function that defines the distance between two points.
 	UFUNCTION(BlueprintCallable)
 	void ChooseHeuristicFunction(const EHeuristic Choice);
+
+	// Check if a World Location is associated to valid node in the grid.
+	UFUNCTION(BlueprintCallable)
+	bool CheckWorldLocation(const FVector& WorldLocation) const;
+	
+protected:
+
+	// Calls GenerateGrid().
+	virtual void BeginPlay() override;
 	
 private:
 
+	// Spawn collision detection blocks and map blocked and walkable areas.
+	virtual void GenerateGrid();
+	
 	// Destroy all nodes.
 	virtual void ResetGrid();
 
@@ -59,9 +67,6 @@ private:
 
 	// Define bounds to check the validity of grid locations.
 	void SetMinMaxLocations();
-
-	// Check if a World Location is associated to valid node in the grid.
-	bool CheckWorldLocation(const FVector& WorldLocation) const;
 
 	// Link AStar nodes to their neighbors.
 	void CreateLinks();
