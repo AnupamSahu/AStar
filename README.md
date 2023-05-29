@@ -1,9 +1,11 @@
 # AStar
  
  A simple implementation of the popular Best-First Search Path Finding Algortihm, A*.
- Made with Unreal Engine 5 and C++. 
-  
-![image](https://user-images.githubusercontent.com/35849508/137593168-89b854fe-6575-46a8-87ea-8b031422611e.png)
+ Made with Unreal Engine 5 and C++.
+ 
+ <p align="center">
+  <img width="300" height="300" src="https://github.com/AnupamSahu/AStar/assets/35849508/06225bb0-623c-4ff7-911f-f7188527d503">
+</p>
 
 Resources :
 * [Sebastian Lague](https://www.youtube.com/watch?v=-L-WgKMFuhE&t)
