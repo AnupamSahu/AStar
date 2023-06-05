@@ -14,11 +14,20 @@ struct FGraphNode
 
 struct FAStarGraphNode : FGraphNode
 {
-	FAStarGraphNode() = default;
-	
-	FAStarGraphNode(const FVector& WorldLocation)
-		: Location(WorldLocation)
+	FAStarGraphNode()
+		:
+	GCost(BIG_NUMBER),
+	HCost(BIG_NUMBER),
+	PathPenalty(0.0f),
+	bIsWalkable(true),
+	Parent(nullptr)
 	{}
+	
+	explicit FAStarGraphNode(const FVector& WorldLocation)
+		: FAStarGraphNode()
+	{
+		Location = WorldLocation;
+	}
 
 	bool operator==(const FAStarGraphNode& Other) const
 	{
@@ -42,13 +51,9 @@ struct FAStarGraphNode : FGraphNode
 
 	FVector Location = FVector::ZeroVector;
 
-	float GCost = BIG_NUMBER;
-	
-	float HCost = BIG_NUMBER;
-
-	bool bIsWalkable = true;
-
-	FAStarGraphNode* Parent = nullptr;
+	float GCost, HCost, PathPenalty;
+	bool bIsWalkable;
+	FAStarGraphNode* Parent;
 };
 
 struct FMostOptimalNode

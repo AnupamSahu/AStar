@@ -1,33 +1,71 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "AStarNavVolume.h"
-#include "BlockActor.h"
+#include "NavVolumeModifier.h"
 #include "Kismet/KismetSystemLibrary.h"
 
-void AAStarNavVolume::GenerateGrid()
+void AAStarNavVolume::BeginPlay()
 {
-	verifyf(BlockActor != nullptr, TEXT("BlockActor is not set."));
-
-	ResetGrid();
+	Super::BeginPlay();
 	
-	FVector Location = Origin;
-	for (uint32 Row = 0; Row < Size; ++Row)
+	GenerateGraph();
+}
+
+void AAStarNavVolume::GenerateGraph()
+{
+	const float NavDimensionX = BoxComponent->GetScaledBoxExtent().X;
+	const float NavDimensionY = BoxComponent->GetScaledBoxExtent().Y;
+	const FVector& NavVolumeOrigin = GetActorLocation();
+	
+	MaxWorldLocation = NavVolumeOrigin + GetActorRightVector() * NavDimensionY + GetActorForwardVector() * NavDimensionX;
+	MinWorldLocation = NavVolumeOrigin - GetActorRightVector() * NavDimensionY - GetActorForwardVector() * NavDimensionX;
+
+	const uint32 NumRows = (NavDimensionY / AgentSize) * 2;
+	const uint32 NumCols = (NavDimensionX / AgentSize) * 2;
+
+	const UWorld* World = GetWorld();
+
+	FVector Location = MinWorldLocation;
+
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldStatic));
+	
+	for (uint32 Row = 0; Row < NumRows; ++Row)
 	{
-		BlockGrid.Add(TArray<FGridNode>());
-		for (uint32 Column = 0; Column < Size; ++Column)
+		NavGraph.Add(TArray<FAStarGraphNode>());
+		for (uint32 Column = 0; Column < NumCols; ++Column)
 		{
-			ABlockActor* NewBlockActor = SpawnBlockActor(Location);
-			BlockGrid[Row].Add({NewBlockActor, FAStarGraphNode(Location)});
-			BlockGrid[Row].Last().AStarNode.bIsWalkable = NewBlockActor->GetIsWalkable();
-			Location += FVector::RightVector * Separation;
+			NavGraph[Row].Add(FAStarGraphNode(Location + (GetActorForwardVector() * AgentSize / 2) + (GetActorRightVector() * AgentSize / 2)));
+			FAStarGraphNode& NewNode = NavGraph[Row][Column];
+			
+			TArray<AActor*> HitActors;
+			if(UKismetSystemLibrary::BoxOverlapActors(World, Location, FVector(AgentSize), ObjectTypes, AActor::StaticClass(), {this}, HitActors))
+			{
+				ANavVolumeModifier* Modifier;
+				if(HitActors.FindItemByClass<ANavVolumeModifier>(&Modifier))
+				{
+					NewNode.PathPenalty = Modifier->GetPenalty();
+				}
+				else
+				{
+					NewNode.bIsWalkable = false;
+				}
+			}
+			
+			Location += GetActorRightVector() * AgentSize;
 		}
 
-		Location += FVector::ForwardVector * Separation;
-		Location.Y = Origin.Y;
+		Location += GetActorForwardVector() * AgentSize;
+		Location.Y = MinWorldLocation.Y;
 	}
 
-	SetMinMaxLocations();
 	CreateLinks();
+}
+
+AAStarNavVolume::AAStarNavVolume()
+{
+	BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));
+	SetRootComponent(BoxComponent);
 }
 
 void AAStarNavVolume::FindPath(const FVector& Start, const FVector& Destination)
@@ -36,14 +74,14 @@ void AAStarNavVolume::FindPath(const FVector& Start, const FVector& Destination)
 	const FAStarGraphNode* DestinationNode = nullptr;
 	
 	int32 Row, Column;
-	if(ConvertWorldToGridLocation(Start, Row, Column))
+	if(GetGraphNodeFromLocation(Start, Row, Column))
 	{
-		StartNode = &BlockGrid[Row][Column].AStarNode;
+		StartNode = &NavGraph[Row][Column];
 	}
 	
-	if(ConvertWorldToGridLocation(Destination, Row, Column))
+	if(GetGraphNodeFromLocation(Destination, Row, Column))
 	{
-		DestinationNode = &BlockGrid[Row][Column].AStarNode;
+		DestinationNode = &NavGraph[Row][Column];
 	}
 
 	if(!StartNode || !DestinationNode)
@@ -68,20 +106,13 @@ void AAStarNavVolume::ChooseHeuristicFunction(const EHeuristic Choice)
 	PathFinder.ChooseHeuristicFunction(Choice);
 }
 
-void AAStarNavVolume::BeginPlay()
-{
-	Super::BeginPlay();
-	
-	GenerateGrid();
-}
-
 void AAStarNavVolume::CreateLinks()
 {
-	for(uint32 Row = 0; Row < Size; ++Row)
+	for(int32 Row = 0; Row < NavGraph.Num(); ++Row)
 	{
-		for(uint32 Column = 0; Column < Size; ++ Column)
+		for(int32 Column = 0; Column < NavGraph[Row].Num(); ++Column)
 		{
-			FGridNode& Node = BlockGrid[Row][Column];
+			FAStarGraphNode& Node = NavGraph[Row][Column];
 			LinkNodes(Node, Row, Column + 1);
 			LinkNodes(Node, Row + 1, Column);
 			LinkNodes(Node, Row, Column - 1);
@@ -94,49 +125,17 @@ void AAStarNavVolume::CreateLinks()
 	}
 }
 
-void AAStarNavVolume::LinkNodes(FGridNode& TargetNode, const uint32 FromRow, const uint32 FromColumn)
+void AAStarNavVolume::LinkNodes(FAStarGraphNode& TargetNode, const uint32 FromRow, const uint32 FromColumn)
 {
 	if(IsValidGridLocation(FromRow, FromColumn))
 	{
-		TargetNode.AStarNode.AdjacentNodes.Add(&BlockGrid[FromRow][FromColumn].AStarNode);
-	}
-}
-
-ABlockActor* AAStarNavVolume::SpawnBlockActor(const FVector& Location) const
-{
-	FActorSpawnParameters SpawnParameters;
-	SpawnParameters.ObjectFlags |= RF_Transient;
-
-#if UE_EDITOR
-	SpawnParameters.bHideFromSceneOutliner = true;
-#endif
-
-	ABlockActor* NewBlockActor = Cast<ABlockActor>(GetWorld()->SpawnActor(BlockActor, &Location, &FRotator::ZeroRotator, SpawnParameters));
-	NewBlockActor->SetActorLocation(Location);
-	NewBlockActor->UpdateBlock();
-
-	return NewBlockActor;
-}
-
-void AAStarNavVolume::ResetGrid()
-{
-	for (const TArray<FGridNode>& Row : BlockGrid)
-	{
-		for (const FGridNode& Node : Row)
-		{
-			if (!IsValid(Node.Block))
-			{
-				continue;
-			}
-			
-			Node.Block->Destroy();
-		}
+		TargetNode.AdjacentNodes.Add(&NavGraph[FromRow][FromColumn]);
 	}
 }
 
 bool AAStarNavVolume::IsValidGridLocation(const uint32 Row, const uint32 Column) const
 {
-	return BlockGrid.IsValidIndex(Row) && BlockGrid[Row].IsValidIndex(Column);
+	return NavGraph.IsValidIndex(Row) && NavGraph[Row].IsValidIndex(Column);
 }
 
 bool AAStarNavVolume::CheckWorldLocation(const FVector& WorldLocation) const
@@ -145,7 +144,7 @@ bool AAStarNavVolume::CheckWorldLocation(const FVector& WorldLocation) const
 		&& WorldLocation.X <= MaxWorldLocation.X && WorldLocation.Y <= MaxWorldLocation.Y;
 }
 
-bool AAStarNavVolume::ConvertWorldToGridLocation(const FVector& WorldLocation, int32& Row, int32& Column) const
+bool AAStarNavVolume::GetGraphNodeFromLocation(const FVector& WorldLocation, int32& Row, int32& Column) const
 {
 	Row = -1;
 	Column = -1;
@@ -155,16 +154,11 @@ bool AAStarNavVolume::ConvertWorldToGridLocation(const FVector& WorldLocation, i
 		return false;
 	}
 
-	const FVector& RelativeWorldLocation = WorldLocation - Origin;
+	const FVector& RelativeWorldLocation = WorldLocation - MinWorldLocation;
 	
-	Row = (RelativeWorldLocation.X / Separation);
-	Column = (RelativeWorldLocation.Y / Separation);
+	Row = (RelativeWorldLocation.X / AgentSize);
+	Column = (RelativeWorldLocation.Y / AgentSize);
 
 	return true;
 }
 
-void AAStarNavVolume::SetMinMaxLocations()
-{
-	MaxWorldLocation = Origin + FVector::RightVector * (Size - 1) * Separation + FVector::ForwardVector * (Size - 1) * Separation;
-	MinWorldLocation = Origin;
-}
