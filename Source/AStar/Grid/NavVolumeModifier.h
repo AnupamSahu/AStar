@@ -20,6 +20,7 @@ public:
 		PrimaryActorTick.bCanEverTick = false;
 
 		BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));
+		BoxComponent->SetCollisionProfileName(TEXT("OverlapAll"));
 		SetRootComponent(BoxComponent);
 	}
 
