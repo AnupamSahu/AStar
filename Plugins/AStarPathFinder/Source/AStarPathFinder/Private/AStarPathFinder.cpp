@@ -1,15 +1,16 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "AStarPathFinder.h"
-#include "DistanceFunctionsLibrary.h"
+#include "..\Public\HeuristicLibrary.h"
+
 
 FAStarPathFinder::FAStarPathFinder()
 {
 	// TODO : Maybe there's a better way to do this.
-	HeuristicsMap.Add(EHeuristic::Euclidean, DistanceFunctionsLibrary::GetEuclideanDistance);
-	HeuristicsMap.Add(EHeuristic::Manhattan, DistanceFunctionsLibrary::GetManhattanDistance);
-	HeuristicsMap.Add(EHeuristic::Chebyshev, DistanceFunctionsLibrary::GetChebyshevDistance);
-	HeuristicsMap.Add(EHeuristic::Octile, DistanceFunctionsLibrary::GetOctileDistance);
+	HeuristicsMap.Add(EHeuristic::Euclidean, FHeuristicLibrary::GetEuclideanDistance);
+	HeuristicsMap.Add(EHeuristic::Manhattan, FHeuristicLibrary::GetManhattanDistance);
+	HeuristicsMap.Add(EHeuristic::Chebyshev, FHeuristicLibrary::GetChebyshevDistance);
+	HeuristicsMap.Add(EHeuristic::Octile, FHeuristicLibrary::GetOctileDistance);
 	
 	HeuristicFunction = HeuristicsMap[EHeuristic::Manhattan];
 }
@@ -86,6 +87,7 @@ void FAStarPathFinder::ChooseHeuristicFunction(const EHeuristic Choice)
 	{
 		return;
 	}
+	
 	HeuristicFunction = HeuristicsMap[Choice];
 }
 

@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 
-class FAStarPathFinderModule : public IModuleInterface
+class FPathFinderModule : public IModuleInterface
 {
 public:
 
