@@ -11,7 +11,7 @@ UAStarPathFinder::UAStarPathFinder()
 	HeuristicsMap.Add(EHeuristic::Chebyshev, DistanceFunctionsLibrary::GetChebyshevDistance);
 	HeuristicsMap.Add(EHeuristic::Octile, DistanceFunctionsLibrary::GetOctileDistance);
 	
-	HeuristicFunction = HeuristicsMap[EHeuristic::Euclidean];
+	HeuristicFunction = HeuristicsMap[EHeuristic::Manhattan];
 }
 
 void UAStarPathFinder::FindPath(FAStarGraphNode* Start, const FAStarGraphNode* Destination, TArray<const FAStarGraphNode*>& OutPath)
@@ -56,7 +56,7 @@ void UAStarPathFinder::FindPath(FAStarGraphNode* Start, const FAStarGraphNode* D
 			}
 			
 			// Calculate the cost of movement to this node.
-			const float GCost = Current->GCost + HeuristicFunction(Neighbor->Location, Current->Location);
+			const float GCost = (Current->GCost + HeuristicFunction(Neighbor->Location, Current->Location)) * (1 + Neighbor->PathPenalty);
 			
 			// If the path to this node is cheaper, link the current node to this node as its parent.
 			const bool bIsInOpen = Open.Contains(Neighbor);

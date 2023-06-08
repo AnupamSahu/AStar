@@ -3,22 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BlockActor.h"
-#include "MapNode.h"
 #include "UAStarPathFinder.h"
 #include "AStarNavVolume.generated.h"
 
-// Forward Declarations
-class ABlockActor;
-
-// A block on the grid contains information about its block and the AStar node that it represents.
-struct FGridNode
-{
-	ABlockActor* Block;
-
-	FAStarGraphNode AStarNode;
-};
-
+class UBoxComponent;
 /**
  * A simple implementation of a navigation volume that
  * spawns collision detection boxes in a user specified
@@ -29,11 +17,12 @@ struct FGridNode
 UCLASS()
 class ASTAR_API AAStarNavVolume : public AActor
 {
-
 	GENERATED_BODY()
 
 public:
 
+	AAStarNavVolume();
+	
 	// Use AStar Pathfinding to find the shortest path between Start and Destination locations if they are valid walkable locations.
 	UFUNCTION(BlueprintCallable)
 	void FindPath(const FVector& Start, const FVector& Destination);
@@ -54,50 +43,30 @@ protected:
 private:
 
 	// Spawn collision detection blocks and map blocked and walkable areas.
-	virtual void GenerateGrid();
-	
-	// Destroy all nodes.
-	virtual void ResetGrid();
+	virtual void GenerateGraph();
 
 	// Checks if give row, column pair is a valid location in the grid.
 	bool IsValidGridLocation(uint32 Row, uint32 Column) const;
 
 	// Map a World Location to a location in the grid.
-	bool ConvertWorldToGridLocation(const FVector& WorldLocation, int32& Row, int32& Column) const;
-
-	// Define bounds to check the validity of grid locations.
-	void SetMinMaxLocations();
+	bool GetGraphNodeFromLocation(const FVector& WorldLocation, int32& Row, int32& Column) const;
 
 	// Link AStar nodes to their neighbors.
 	void CreateLinks();
 
 	// Link One node to a specific neighbor identified by its row and column values.
-	void LinkNodes(FGridNode& TargetNode, uint32 FromRow, uint32 FromColumn);
-
-	// TODO : Do we really need actors?
-	// Spawn a collision detection box at a specific location.
-	ABlockActor* SpawnBlockActor(const FVector& Location) const;
+	void LinkNodes(FAStarGraphNode& TargetNode, uint32 FromRow, uint32 FromColumn);
 
 private:
 
-	// The Origin of the Grid, all Grid Blocks are placed relative to this Origin
-	UPROPERTY(EditAnywhere, Category = "Nav Volume", Meta = (MakeEditWidget = true))
-	FVector Origin;
-	
-	// Number of Blocks Along X Axis
 	UPROPERTY(EditAnywhere, Category = "Nav Volume")
-	uint32 Size;
+	UBoxComponent* BoxComponent;
 
-	// Defines the minimum separation between two blocks
 	UPROPERTY(EditAnywhere, Category = "Nav Volume")
-	float Separation = 100.0f;
-	
-	// An Actor that represents a Block
-	UPROPERTY(EditAnywhere, Category = "Nav Volume")
-	TSubclassOf<ABlockActor> BlockActor;
+	float AgentSize = 100.0f;
 	
 	// A two-dimensional array containing all Block Actors (Collision detection boxes)
-	TArray<TArray<FGridNode>> BlockGrid;
+	TArray<TArray<FAStarGraphNode>> NavGraph;
 
 	// Bounds of the map.
 	FVector MinWorldLocation, MaxWorldLocation;
