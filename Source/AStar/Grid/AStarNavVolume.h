@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UAStarPathFinder.h"
+#include "..\..\..\Plugins\AStarPathFinder\Source\AStarPathFinder\Public\AStarPathFinder.h"
 #include "AStarNavVolume.generated.h"
 
 class UBoxComponent;
@@ -12,7 +12,7 @@ class UBoxComponent;
  * spawns collision detection boxes in a user specified
  * region, in a grid like arrangement, to map walkable places.
  *
- * This class also serves as a good example of how the UAStarPathFinder class is used.
+ * This class also serves as a good example of how the FAStarPathFinder class is used.
  */
 UCLASS()
 class ASTAR_API AAStarNavVolume : public AActor
@@ -72,6 +72,6 @@ private:
 	FVector MinWorldLocation, MaxWorldLocation;
 
 	// AStar Pathfinder object.
-	UAStarPathFinder PathFinder;
+	FAStarPathFinder PathFinder;
 	
 };
