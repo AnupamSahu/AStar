@@ -15,15 +15,15 @@ class ASTAR_API ANavVolumeModifier : public AActor
 public:
 	// Sets default values for this actor's properties
 	ANavVolumeModifier()
-		:Penalty(0.0f)
 	{
 		PrimaryActorTick.bCanEverTick = false;
-
-		BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));
-		BoxComponent->SetCollisionProfileName(TEXT("OverlapAll"));
-		SetRootComponent(BoxComponent);
 	}
 
+	bool GetWalkability() const
+	{
+		return bIsWalkable;
+	}
+	
 	float GetPenalty() const
 	{
 		return Penalty;
@@ -32,9 +32,9 @@ public:
 private:
 
 	UPROPERTY(EditAnywhere, Category = "Modifier Settings", meta = (ClampMin = 0.0, UIMin = 0.0, ClampMax = 1.0, UIMax = 1.0))
-	float Penalty;
+	float Penalty = 0.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Modifier Settings")
-	UBoxComponent* BoxComponent;
+	bool bIsWalkable = true;
 	
 };

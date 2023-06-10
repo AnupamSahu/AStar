@@ -45,10 +45,7 @@ void AAStarNavVolume::GenerateGraph()
 				if(HitActors.FindItemByClass<ANavVolumeModifier>(&Modifier))
 				{
 					NewNode.PathPenalty = Modifier->GetPenalty();
-				}
-				else
-				{
-					NewNode.bIsWalkable = false;
+					NewNode.bIsWalkable = Modifier->GetWalkability();
 				}
 			}
 			
