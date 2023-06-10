@@ -18,6 +18,11 @@
 			"Name": "AStarPathFinder",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "AStarNavVolume",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
 		}
 	]
 }
