@@ -20,8 +20,8 @@ void AAStarNavVolume::GenerateGraph()
 	MaxWorldLocation = NavVolumeOrigin + GetActorRightVector() * NavDimensionY + GetActorForwardVector() * NavDimensionX;
 	MinWorldLocation = NavVolumeOrigin - GetActorRightVector() * NavDimensionY - GetActorForwardVector() * NavDimensionX;
 
-	const uint32 NumRows = (NavDimensionY / AgentSize) * 2;
-	const uint32 NumCols = (NavDimensionX / AgentSize) * 2;
+	const uint32 NumRows = (NavDimensionX / AgentSize) * 2;
+	const uint32 NumCols = (NavDimensionY / AgentSize) * 2;
 
 	const UWorld* World = GetWorld();
 
